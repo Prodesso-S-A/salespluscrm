@@ -1,0 +1,18 @@
+{{#if success_msg}}
+<script>
+		Swal.fire({
+			title: 'Éxito!',
+			text: '{{success_msg}}',
+			icon: 'success'
+		})
+</script>
+{{/if}}
+{{#if error_msg}}
+<script>
+		Swal.fire({
+			title: 'Error!',
+			text: '{{error_msg}}',
+			icon: 'error'
+		})
+</script>
+{{/if}}
