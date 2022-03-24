@@ -12,7 +12,4 @@ const menuSchema = new mongoose.Schema({
 });
 
 // Creating a Model from that Schema
-const Menu = mongoose.model("Menu", menuSchema);
-
-// Exporting the Model to use it in app.js File.
-module.exports = Menu;
+module.exports = mongoose.model('Menu',menuSchema)
