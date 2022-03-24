@@ -16,7 +16,7 @@ router.post('/usuario', async (req,res)=>{
     }else{
         const emailUser = await User.findOne({email:email}).lean()
         if(emailUser){
-            req.flash('error_msg','Usuario ya existe')
+            req.flash('error_msg','Usuario ya existe en el sistema')
             res.redirect('/usuario')
         }else{
 
