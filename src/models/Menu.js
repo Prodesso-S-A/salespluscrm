@@ -12,4 +12,4 @@ const menuSchema = new mongoose.Schema({
 });
 
 // Creating a Model from that Schema
-module.exports = mongoose.model('Rol',RolSchema)
+module.exports = mongoose.model('Menu',menuSchema)
