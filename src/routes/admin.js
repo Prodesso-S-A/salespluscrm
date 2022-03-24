@@ -4,6 +4,8 @@ const passport = require('passport')
 const User = require('../models/User')
 const Rol = require('../models/Rol')
 const Menu = require('../models/Menu')
+
+//Usuarios
 router.get('/usuario',isAuthenticated, async(req,res)=>{
     const usuario = await User.find().lean()
     res.render('./admin/usuarios',{usuario})
@@ -30,13 +32,10 @@ router.post('/usuario', async (req,res)=>{
     }
  
 })
+// Roles
 router.get('/rol',isAuthenticated, async(req,res)=>{
     const rol = await Rol.find().lean()
     res.render('./admin/roles',{rol})
-})
-router.get('/menu',isAuthenticated, async(req,res)=>{
-    const menu = await Menu.find().lean()
-    res.render('./admin/menus',{menu})
 })
 router.post('/rol', async (req,res)=>{
     const {nombre}=req.body
@@ -59,6 +58,11 @@ router.post('/rol', async (req,res)=>{
     }
  
 })
+//Menus
+router.get('/menu',isAuthenticated, async(req,res)=>{
+    const menu = await Menu.find().lean()
+    res.render('./admin/menus',{menu})
+})
 router.post('/menu', async (req,res)=>{
     const {Nombre,MenuPadre,Class,Segmento,Modulo,Url}=req.body
     const errors = []
@@ -80,6 +84,8 @@ router.post('/menu', async (req,res)=>{
     }
  
 })
+
+
 function isAuthenticated(req, res, next){
     if(req.isAuthenticated()){
         return next();
