@@ -4,9 +4,8 @@ const passport = require('passport')
 const User = require('../models/User')
 const Rol = require('../models/Rol')
 const Menu = require('../models/Menu')
-
 //Usuarios
-router.get('/usuario',isAuthenticated, async(req,res)=>{
+router.get('/usuario', async(req,res)=>{
     const usuario = await User.find().lean()
     res.render('./admin/usuarios',{usuario})
 })
