@@ -11,7 +11,7 @@ router.post('/login/unlock',passport.authenticate('local',{failureRedirect:'/'})
 	const {url}=req.body
 	res.redirect(url);
 })
-router.get('/dashboard', isAuthenticated, (req, res) => {
+router.get('/dashboard', (req, res) => {
     res.render('index')
 })
 router.get('/lock',isAuthenticated, (req, res) => {

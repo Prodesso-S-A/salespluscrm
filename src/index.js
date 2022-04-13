@@ -28,12 +28,18 @@ var hbs = create({
 app.engine('.hbs', hbs.engine);
 app.set('view engine', '.hbs');
 
+hbs.handlebars.registerHelper('ifCond', function (v1, v2, options) {
+    if (v1 == v2) {
+        return options.fn(this);
+    }
+    return options.inverse(this);
+});
 hbs.handlebars.registerHelper('dateFormat', require('handlebars-dateformat'));
 hbs.handlebars.registerHelper('json', function (obj) {
     return new Handlebars.SafeString(JSON.stringify(obj))
 })
 //Midelwares
-app.use(express.urlencoded({ extended: false }));
+app.use(express.urlencoded({ extended: true }));
 app.use(methodOverride('_method'));
 app.use(sessions({
     secret: 'mysecretapp',
