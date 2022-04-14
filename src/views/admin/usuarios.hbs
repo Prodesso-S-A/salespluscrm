@@ -36,6 +36,10 @@
                                                                         placeholder="Enter email">
                                                                 </div>
                                                                 <div class="form-group">
+                                                                    <label for="organizacion">Organización</label>
+                                                                    <input class="form-control" id="organizacion" name="organizacion">
+                                                                </div>
+                                                                <div class="form-group">
                                                                     <label for="password">Password</label>
                                                                     <input type="password" value="{{password}}"
                                                                         name="password" class="form-control"
@@ -72,6 +76,7 @@
                                 <tr>
                                     <th>Nombre</th>
                                     <th>Correo</th>
+                                    <th>Organización</th>
                                     <th>Fecha de creación</th>
                                 </tr>
                             </thead>
@@ -80,6 +85,7 @@
                                 <tr>
                                     <td>{{nombre}}</td>
                                     <td>{{email}}</td>
+                                    <th>{{idOrganizacion}}</th>
                                     <td>{{createdAt}}</td>
                                 </tr>
                                 {{/each}}
@@ -93,3 +99,18 @@
 </div>
 <!-- #/ container -->
 </div>
+<script>
+    $(document).ready(function () {
+        $('#organizacion').magicSuggest({
+            data: '/orgJson',
+            name: 'organizacion',
+            maxSelection: 1,
+            valueField: 'Nombre',
+            displayField: 'Nombre',
+            renderer: function (data) {
+                return data.Nombre;
+            },
+            allowFreeEntries: false
+        });
+    });
+</script>
