@@ -67,7 +67,15 @@ app.use(express.static(path.join(__dirname, 'public')))
 
 app.use(function(err,req,res,next){
     var errormsg=[]
-    errormsg.push({Mensaje:"Error: "+err , stack:"Stack: "+err.stack, code:typeof err.http_code!= 'undefined'? err.http_code:'0' , url:req.originalUrl, user:typeof req.user!= 'undefined'? req.user:'0', timeerror: Date.now})
+    var d = new Date,
+        dformat = [ (d.getMonth()+1).padLeft(),
+                    d.getDate().padLeft(),
+                    d.getFullYear()].join('/')+
+                    ' ' +
+                  [ d.getHours().padLeft(),
+                    d.getMinutes().padLeft(),
+                    d.getSeconds().padLeft()].join(':');
+    errormsg.push({Mensaje:"Error: "+err , stack:"Stack: "+err.stack, code:typeof err.http_code!= 'undefined'? err.http_code:'0' , url:req.originalUrl, user:typeof req.user!= 'undefined'? req.user:'0', timeerror: dformat})
     res.render('error',{ errormsg ,title: 'error', layout: 'login' })
 })
 //Server Listening
