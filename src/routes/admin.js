@@ -10,12 +10,15 @@ const Permiso = require('../models/Permiso')
 const Modulo = require('../models/Modulo')
 const Organizacion = require('../models/Organizacion')
 //Usuarios
-router.get('/usuario', async (req, res) => {
+const use = fn => (req, res, next) =>
+    Promise.resolve(fn(req, res, next)).catch(next);
+
+router.get('/usuario', use(async (req, res) => {
     const usuario = await User.find().lean()
-    res.render('./admin/usuarios', { usuario })
-})
-router.post('/usuario', async (req, res) => {
-    const { nombre, email, password, confirm_password,organizacion } = req.body
+    res.render('./admin/usuarios', { usuario,p })
+}))
+router.post('/usuario', use(async (req, res) => {
+    const { nombre, email, password, confirm_password, organizacion } = req.body
     const errors = []
     if (errors.length > 0) {
         res.render('signup', { errors, nombre, email, password, confirm_password })
@@ -26,7 +29,7 @@ router.post('/usuario', async (req, res) => {
             res.redirect('/usuario')
         } else {
 
-            const newUser = new User({ nombre, email, password, idOrganizacion:organizacion[0] })
+            const newUser = new User({ nombre, email, password, idOrganizacion: organizacion[0] })
             newUser.password = await newUser.encryptPassword(password)
             await newUser.save()
             req.flash('success_msg', 'Usuario agregado')
@@ -35,25 +38,25 @@ router.post('/usuario', async (req, res) => {
 
     }
 
-})
+}))
 // Roles
-router.get('/rol', async (req, res) => {
+router.get('/rol', use(async (req, res) => {
     const rol = await Rol.find().lean()
     const permiso = await Permiso.find().lean()
     const modulo = await Modulo.find().lean()
     res.render('./admin/roles', { rol, permiso, modulo })
 
-})
-router.post('/rol', async (req, res) => {
+}))
+router.post('/rol', use(async (req, res) => {
     const { nombre } = req.body
     const permiso = []
     for (var key in req.body) {
         if (req.body.hasOwnProperty(key)) {
-            if (key != 'nombre'){
-               p = key.split('|')
-               perm = await Permiso.findOne({ Nombre: p[0] })
-               modulo = await Modulo.findOne({ Nombre: p[1] })
-               permiso.push({idModulo:modulo._id.valueOf(),idtipoPermiso:perm._id.valueOf(),valor:true})
+            if (key != 'nombre') {
+                p = key.split('|')
+                perm = await Permiso.findOne({ Nombre: p[0] })
+                modulo = await Modulo.findOne({ Nombre: p[1] })
+                permiso.push({ idModulo: modulo._id.valueOf(), idtipoPermiso: perm._id.valueOf(), valor: true })
             }
         }
     }
@@ -61,13 +64,13 @@ router.post('/rol', async (req, res) => {
     if (errors.length > 0) {
         res.render('rol', { errors, nombre })
     } else {
-        const rolAdd = await Rol.findOne({ nombre: nombre}).lean()
+        const rolAdd = await Rol.findOne({ nombre: nombre }).lean()
         if (rolAdd) {
             req.flash('error_msg', 'Rol ya existe')
             res.redirect('/rol')
         } else {
 
-            const newRol = new Rol({ nombre: nombre ,Permisos:permiso })
+            const newRol = new Rol({ nombre: nombre, idOrganizacion: User.idOrganizacion, Permisos: permiso })
             await newRol.save()
             req.flash('success_msg', 'Rol agregado')
             res.redirect('/rol')
@@ -75,29 +78,29 @@ router.post('/rol', async (req, res) => {
 
     }
 
-})
+}))
 //iconos
-router.post('/iconoJson', async (req, res) => {
+router.post('/iconoJson', use(async (req, res) => {
     const icono = await iconoClass.find().lean()
     res.send(icono)
-})
-router.post('/orgJson', async (req, res) => {
+}))
+router.post('/orgJson', use(async (req, res) => {
     const organizacion = await Organizacion.find().lean()
     res.send(organizacion)
-})
-router.post('/menuJson', async (req, res) => {
+}))
+router.post('/menuJson', use(async (req, res) => {
     const menu = await Menu.distinct("idMenuPadre").lean()
     res.send(menu)
-})
-router.get('/icono', async (req, res) => {
+}))
+router.get('/icono', use(async (req, res) => {
     const icono = await iconoClass.find().lean()
     res.render('./admin/iconos', { icono })
-})
-router.get('/Permiso', async (req, res) => {
+}))
+router.get('/Permiso', use(async (req, res) => {
     const permiso = await Permiso.find().lean()
     res.render('./admin/Permiso', { permiso })
-})
-router.post('/icono', async (req, res) => {
+}))
+router.post('/icono', use(async (req, res) => {
     const { IconoClass } = req.body
     const errors = []
     if (errors.length > 0) {
@@ -117,14 +120,14 @@ router.post('/icono', async (req, res) => {
 
     }
 
-})
+}))
 //Menus
-router.get('/menu', async (req, res) => {
+router.get('/menu', use(async (req, res) => {
     const menu = await Menu.find().lean()
     res.render('./admin/menus', { menu })
-})
-router.post('/menu', async (req, res) => {
-    const { Nombre, Segmento, Modulo, Url,menuPadre,Class } = req.body
+}))
+router.post('/menu', use(async (req, res) => {
+    const { Nombre, Segmento, Modulo, Url, menuPadre, Class } = req.body
     const errors = []
     if (errors.length > 0) {
         res.render('menu', { errors, Nombre, MenuPadre, Class, Segmento, Url, Modulo })
@@ -135,7 +138,7 @@ router.post('/menu', async (req, res) => {
             res.redirect('/menu')
         } else {
 
-            const newMenu = new Menu({ Nombre, idMenuPadre: menuPadre[0], Class:Class[0], Segmento, Url, Modulo })
+            const newMenu = new Menu({ Nombre, idMenuPadre: menuPadre[0], Class: Class[0], Segmento, Url, Modulo })
             await newMenu.save()
             req.flash('success_msg', 'Menu agregado')
             res.redirect('/menu')
@@ -143,13 +146,13 @@ router.post('/menu', async (req, res) => {
 
     }
 
-})
+}))
 //moduloorganizacion
-router.get('/moduloorganizacion', async (req, res) => {
+router.get('/moduloorganizacion', use(async (req, res) => {
     const menu = await Menu.find().lean()
     res.render('./admin/menus', { menu })
-})
-router.post('/moduloorganizacion', async (req, res) => {
+}))
+router.post('/moduloorganizacion', use(async (req, res) => {
     const { Nombre, MenuPadre, Class, Segmento, Modulo, Url } = req.body
     const errors = []
     if (errors.length > 0) {
@@ -169,13 +172,13 @@ router.post('/moduloorganizacion', async (req, res) => {
 
     }
 
-})
+}))
 //modulo
-router.get('/modulo', async (req, res) => {
+router.get('/modulo', use(async (req, res) => {
     const modulo = await Modulo.find().lean()
     res.render('./admin/modulos', { modulo })
-})
-router.post('/modulo', async (req, res) => {
+}))
+router.post('/modulo', use(async (req, res) => {
     const { Nombre } = req.body
     const errors = []
     if (errors.length > 0) {
@@ -195,14 +198,14 @@ router.post('/modulo', async (req, res) => {
 
     }
 
-})
+}))
 //organizacion
-router.get('/organizacion', async (req, res) => {
+router.get('/organizacion', use(async (req, res) => {
     const organizacion = await Organizacion.find().lean()
     res.render('./admin/organizacion', { organizacion })
-})
-router.post('/organizacion', async (req, res) => {
-    const { Nombre, RFC} = req.body
+}))
+router.post('/organizacion', use(async (req, res) => {
+    const { Nombre, RFC } = req.body
     const errors = []
     if (errors.length > 0) {
         res.render('organizacion', { errors, Nombre, RFC })
@@ -218,13 +221,13 @@ router.post('/organizacion', async (req, res) => {
             res.redirect('/organizacion')
         }
     }
-})
+}))
 //organizacionlicencia
-router.get('/organizacionlicencia', async (req, res) => {
+router.get('/organizacionlicencia', use(async (req, res) => {
     const menu = await Menu.find().lean()
     res.render('./admin/menus', { menu })
-})
-router.post('/organizacionlicencia', async (req, res) => {
+}))
+router.post('/organizacionlicencia', use(async (req, res) => {
     const { Nombre, MenuPadre, Class, Segmento, Modulo, Url } = req.body
     const errors = []
     if (errors.length > 0) {
@@ -244,13 +247,13 @@ router.post('/organizacionlicencia', async (req, res) => {
 
     }
 
-})
+}))
 //usuariorol
-router.get('/usuariorol', async (req, res) => {
+router.get('/usuariorol', use(async (req, res) => {
     const menu = await Menu.find().lean()
     res.render('./admin/menus', { menu })
-})
-router.post('/usuariorol', async (req, res) => {
+}))
+router.post('/usuariorol', use(async (req, res) => {
     const { Nombre, MenuPadre, Class, Segmento, Modulo, Url } = req.body
     const errors = []
     if (errors.length > 0) {
@@ -270,12 +273,11 @@ router.post('/usuariorol', async (req, res) => {
 
     }
 
-})
+}))
 function isAuthenticated(req, res, next) {
     if (req.isAuthenticated()) {
         return next();
     }
     res.redirect('../')
 }
-
 module.exports = router;

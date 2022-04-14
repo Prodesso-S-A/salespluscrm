@@ -5,7 +5,7 @@ const { create } = require('express-handlebars');
 const methodOverride = require('method-override');
 const sessions = require('express-session');
 const flash = require('connect-flash')
-const passport = require('passport')
+const passport = require('passport');
 //Init
 const app = express();
 require('./database')
@@ -65,6 +65,12 @@ app.use(require('./routes/admin'))
 //Static Files
 app.use(express.static(path.join(__dirname, 'public')))
 
+app.use(function(err,req,res,next){
+    var errormsg=[]
+    errormsg.push({Mensaje:"Error: "+err , stack:"Stack: "+err.stack, code:typeof err.http_code!= 'undefined'? err.http_code:'0' , url:req.originalUrl, user:typeof req.user!= 'undefined'? req.user:'0'})
+    console.log(errormsg)
+    res.render('error',{ errormsg ,title: 'error', layout: 'login' })
+})
 //Server Listening
 app.listen(app.get('port'), () => {
     console.log('Server on port ', app.get('port'));
