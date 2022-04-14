@@ -4,15 +4,10 @@ const bcrypt=require('bcryptjs')
 
 
 const LicenciaSchema = new Schema({
-    idCliente:{type: Number, required:true},
+    idOrganizacion:{type: Schema.Types.ObjectId, required:true},
+    sinceDate:{type:Date,required:true},
     expireDate:{type:Date,required:true},
-    Token:{type:String}
+    Token:{type:String,required:true}
 })
-
-LicenciaSchema.methods.encryptLicense= async (Token)=>{
-    const salt = await bcrypt.genSalt(10);
-    const hash = bcrypt.hash(Token,salt)
-    return hash;
-}
 
 module.exports = mongoose.model('Licencia',LicenciaSchema)

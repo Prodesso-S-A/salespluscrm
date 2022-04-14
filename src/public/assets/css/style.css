@@ -9558,10 +9558,6 @@ Fixing Order => Base + Typography >> General Layout + Grid >> Page Layout + Comp
 .error-bg {
   background: #AFB4C5; }
 
-.error-text {
-  font-size: 5rem;
-  line-height: 5rem; }
-
 #duration-value-axis {
   height: 450px;
   width: 100%; }
@@ -11889,8 +11885,8 @@ table.dataTable thead .sorting::after {
   flex-direction: column; }
 
 .error-text {
-  font-size: 5rem;
-  line-height: 5rem;
+  font-size: 2rem;
+  line-height: 2rem;
   color: #7571f9; }
 
 #password-page1 body {
