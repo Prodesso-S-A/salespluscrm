@@ -20,12 +20,12 @@ router.get('/usuario', use(async (req, res) => {
 router.post('/usuario', use(async (req, res) => {
     const { nombre, email, password, confirm_password, organizacion } = req.body
     const errors = []
-    if (errors.length > 0) {
-        res.render('signup', { errors, nombre, email, password, confirm_password })
-    } else {
-        const emailUser = await User.findOne({ email: email }).lean()
-        if (emailUser) {
-            req.flash('error_msg', 'Usuario ya existe')
+    if(errors.length>0){
+        res.render('signup',{errors,nombre,email,password,confirm_password})
+    }else{
+        const emailUser = await User.findOne({email:email}).lean()
+        if(emailUser){
+            req.flash('error_msg','Usuario ya existe en el sistema')
             res.redirect('/usuario')
         } else {
 
