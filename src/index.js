@@ -64,7 +64,10 @@ app.use(require('./routes/index'))
 app.use(require('./routes/admin'))
 //Static Files
 app.use(express.static(path.join(__dirname, 'public')))
-
+Number.prototype.padLeft = function(base,chr){
+    var  len = (String(base || 10).length - String(this).length)+1;
+    return len > 0? new Array(len).join(chr || '0')+this : this;
+ }
 app.use(function(err,req,res,next){
     var errormsg=[]
     var d = new Date,
