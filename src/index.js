@@ -67,7 +67,7 @@ app.use(express.static(path.join(__dirname, 'public')))
 
 app.use(function(err,req,res,next){
     var errormsg=[]
-    errormsg.push({Mensaje:"Error: "+err , stack:"Stack: "+err.stack, code:typeof err.http_code!= 'undefined'? err.http_code:'0' , url:req.originalUrl, user:typeof req.user!= 'undefined'? req.user:'0',time:Date.now})
+    errormsg.push({Mensaje:"Error: "+err , stack:"Stack: "+err.stack, code:typeof err.http_code!= 'undefined'? err.http_code:'0' , url:req.originalUrl, user:typeof req.user!= 'undefined'? req.user:'0', timeerror: Date.now})
     res.render('error',{ errormsg ,title: 'error', layout: 'login' })
 })
 //Server Listening
