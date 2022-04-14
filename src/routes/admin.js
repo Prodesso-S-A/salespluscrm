@@ -15,17 +15,17 @@ const use = fn => (req, res, next) =>
 
 router.get('/usuario', use(async (req, res) => {
     const usuario = await User.find().lean()
-    res.render('./admin/usuarios', { usuario,p })
+    res.render('./admin/usuarios', { usuario, p })
 }))
 router.post('/usuario', use(async (req, res) => {
     const { nombre, email, password, confirm_password, organizacion } = req.body
     const errors = []
-    if(errors.length>0){
-        res.render('signup',{errors,nombre,email,password,confirm_password})
-    }else{
-        const emailUser = await User.findOne({email:email}).lean()
-        if(emailUser){
-            req.flash('error_msg','Usuario ya existe en el sistema')
+    if (errors.length > 0) {
+        res.render('signup', { errors, nombre, email, password, confirm_password })
+    } else {
+        const emailUser = await User.findOne({ email: email }).lean()
+        if (emailUser) {
+            req.flash('error_msg', 'Usuario ya existe en el sistema')
             res.redirect('/usuario')
         } else {
 
