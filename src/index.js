@@ -6,6 +6,9 @@ const methodOverride = require('method-override');
 const sessions = require('express-session');
 const flash = require('connect-flash')
 const passport = require('passport');
+const Error = require('../src/models/Error')
+const Org = require('../src/models/Organizacion')
+const User = require('../src/models/User')
 //Init
 const app = express();
 require('./database')
@@ -38,6 +41,36 @@ hbs.handlebars.registerHelper('dateFormat', require('handlebars-dateformat'));
 hbs.handlebars.registerHelper('json', function (obj) {
     return new Handlebars.SafeString(JSON.stringify(obj))
 })
+hbs.handlebars.registerHelper("porcentajeAvance", function (fi, ff, options) {
+    var moment = require('moment');  
+    var FI = moment(moment(fi).format('L')); 
+    var FF = moment(moment(ff).format('L'));
+    var FH = moment(moment().format('L'));
+    var meta=FF.diff(FI, 'days')
+    var real=FH.diff(FI, 'days')
+    var porc = (real / meta) * 100
+    if (!options.data.root) {
+        options.data.root = {};
+    }
+    options.data.root["Porcentaje"] = porc;
+    return Math.floor(porc)
+});
+hbs.handlebars.registerHelper( "when",function(operand_1, operator, operand_2, options) {
+
+    var operators = {
+     'eq': function(l,r) { return l == r; },
+     'noteq': function(l,r) { return l != r; },
+     'gt': function(l,r) { return Number(l) > Number(r); },
+     'gteq': function(l,r) { return Number(l) >= Number(r); },
+     'or': function(l,r) { return l || r; },
+     'and': function(l,r) { return l && r; },
+     '%': function(l,r) { return (l % r) === 0; }
+    }
+    , result = operators[operator](operand_1,operand_2);
+  
+    if (result) return options.fn(this);
+    else  return options.inverse(this);
+  });
 //Midelwares
 app.use(express.urlencoded({ extended: true }));
 app.use(methodOverride('_method'));
@@ -64,22 +97,26 @@ app.use(require('./routes/index'))
 app.use(require('./routes/admin'))
 //Static Files
 app.use(express.static(path.join(__dirname, 'public')))
-Number.prototype.padLeft = function(base,chr){
-    var  len = (String(base || 10).length - String(this).length)+1;
-    return len > 0? new Array(len).join(chr || '0')+this : this;
- }
-app.use(function(err,req,res,next){
-    var errormsg=[]
+Number.prototype.padLeft = function (base, chr) {
+    var len = (String(base || 10).length - String(this).length) + 1;
+    return len > 0 ? new Array(len).join(chr || '0') + this : this;
+}
+app.use(function (err, req, res, next) {
+    var errormsg = []
     var d = new Date,
-        dformat = [ (d.getMonth()+1).padLeft(),
-                    d.getDate().padLeft(),
-                    d.getFullYear()].join('/')+
-                    ' ' +
-                  [ d.getHours().padLeft(),
-                    d.getMinutes().padLeft(),
-                    d.getSeconds().padLeft()].join(':');
-    errormsg.push({Mensaje:"Error: "+err , stack:"Stack: "+err.stack, code:typeof err.http_code!= 'undefined'? err.http_code:'0' , url:req.originalUrl, user:typeof req.user!= 'undefined'? req.user:'0', timeerror: dformat})
-    res.render('error',{ errormsg ,title: 'error', layout: 'login' })
+        dformat = [(d.getMonth() + 1).padLeft(),
+        d.getDate().padLeft(),
+        d.getFullYear()].join('/') +
+            ' ' +
+            [d.getHours().padLeft(),
+            d.getMinutes().padLeft(),
+            d.getSeconds().padLeft()].join(':');
+    errormsg.push({ Mensaje: "Error: " + err, stack: "Stack: " + err.stack, code: typeof err.http_code != 'undefined' ? err.http_code : '0', url: req.originalUrl, userid: typeof req.user != 'undefined' ? req.user._id : '0', organizationid: typeof req.user != 'undefined' ? req.user.idOrganizacion : '0', timeerror: dformat })
+    const newError = new Error({ Mensaje: "Error: " + err, stack: "Stack: " + err.stack, code: typeof err.http_code != 'undefined' ? err.http_code : '0', url: req.originalUrl, userid: typeof req.user != 'undefined' ? req.user._id : '0', organizationid: typeof req.user != 'undefined' ? req.user.idOrganizacion : '0', timeerror: dformat })
+
+    newError.save()
+    console.log(errormsg)
+    res.render('error', { errormsg, title: 'error', layout: 'login' })
 })
 //Server Listening
 app.listen(app.get('port'), () => {

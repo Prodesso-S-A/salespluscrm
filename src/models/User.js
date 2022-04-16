@@ -8,7 +8,9 @@ const UserSchema = new Schema({
     email:{type:String,required:true},
     password:{type:String,required:true},
     createdAt: {type: Date,default: Date.now},
-    idOrganizacion: {type: String,required:true}
+    idOrganizacion: {type: String,required:true},
+    Rol:{type:String,required:true},
+    Licencia:{type:String,required:true}
 })
 
 UserSchema.methods.encryptPassword= async (password)=>{

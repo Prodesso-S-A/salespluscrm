@@ -22,7 +22,8 @@
                                                 <div class="form-input-content">
                                                     <div class="card login-form mb-0">
                                                         <div class="card-body pt-5">
-                                                            <form action="/usuario" method="POST">
+                                                            <form class="row g-3 needs-validation" action="/usuario"
+                                                                method="POST">
                                                                 <div class="form-group">
                                                                     <label for="nombre">Nombre Completo</label>
                                                                     <input type="text" value="{{nombre}}" name="nombre"
@@ -33,17 +34,39 @@
                                                                     <label for="email">Email</label>
                                                                     <input type="email" value="{{email}}" name="email"
                                                                         class="form-control" id="email"
-                                                                        placeholder="Enter email">
+                                                                        required="required" placeholder="Enter email"
+                                                                        email="email">
                                                                 </div>
                                                                 <div class="form-group">
                                                                     <label for="organizacion">Organización</label>
-                                                                    <input class="form-control" id="organizacion" name="organizacion">
+                                                                    <input class="form-control" id="organizacion"
+                                                                        name="organizacion">
+                                                                    <input type="text"
+                                                                        class="form-control visually-hidden" id="idOrg"
+                                                                        name="idOrg">
+                                                                </div>
+                                                                <div class="form-group">
+                                                                    <label for="licencia">Licencia</label>
+                                                                    <input class="form-control" id="licencia"
+                                                                        name="licencia">
+                                                                    <input type="text"
+                                                                        class="form-control visually-hidden" id="lic"
+                                                                        name="lic">
+                                                                </div>
+                                                                <div class="form-group">
+                                                                    <label for="rol">Rol</label>
+                                                                    <input class="form-control" id="rol" name="rol">
+                                                                    <input type="text"
+                                                                        class="form-control visually-hidden" id="rl"
+                                                                        name="rl">
                                                                 </div>
                                                                 <div class="form-group">
                                                                     <label for="password">Password</label>
                                                                     <input type="password" value="{{password}}"
                                                                         name="password" class="form-control"
-                                                                        id="password" placeholder="Password">
+                                                                        id="password" placeholder="Password"
+                                                                        required="required"
+                                                                        strong_password="strong_password">
                                                                 </div>
                                                                 <div class="form-group">
                                                                     <label for="confirm_password">Confirm
@@ -78,6 +101,9 @@
                                     <th>Correo</th>
                                     <th>Organización</th>
                                     <th>Fecha de creación</th>
+                                    <th>Rol</th>
+                                    <th>Duración de Licencia</th>
+                                    <th>Status de Licencia</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -85,8 +111,33 @@
                                 <tr>
                                     <td>{{nombre}}</td>
                                     <td>{{email}}</td>
-                                    <th>{{idOrganizacion}}</th>
-                                    <td>{{createdAt}}</td>
+                                    {{#each this.Org}}
+                                    <td>{{this.Nombre}}</td>
+                                    {{/each}}
+                                    <td>{{dateFormat createdAt "DD/MM/yyyy, h:mm:ss a" utc}}</td>
+                                    <td>{{email}}</td>
+                                    {{#each this.Lic}}
+                                    <td>
+                                        <div class="progress" style="height: 10px">
+                                            <div class="progress-bar gradient-1"
+                                                style="width: {{porcentajeAvance this.sinceDate this.expireDate}}%;"
+                                                role="progressbar">
+                                            </div>
+                                        </div>
+                                    </td>
+                                    {{#if this.Activa}}
+                                    {{#when @root.Porcentaje 'gteq' 90}}
+                                    <td><span class="badge bg-warning">Por Vencer</span></td>
+                                    {{else}}
+                                    {{#when @root.Porcentaje 'gteq' 0}}
+                                    <td><span class="badge bg-success">Activa</span></td>
+                                    {{/when}}
+                                    {{/when}}
+
+                                    {{else}}
+                                    <td><span class="badge bg-danger">Inactiva</span></td>
+                                    {{/if}}
+                                    {{/each}}
                                 </tr>
                                 {{/each}}
                             </tbody>
@@ -97,20 +148,3 @@
         </div>
     </div>
 </div>
-<!-- #/ container -->
-</div>
-<script>
-    $(document).ready(function () {
-        $('#organizacion').magicSuggest({
-            data: '/orgJson',
-            name: 'organizacion',
-            maxSelection: 1,
-            valueField: 'Nombre',
-            displayField: 'Nombre',
-            renderer: function (data) {
-                return data.Nombre;
-            },
-            allowFreeEntries: false
-        });
-    });
-</script>

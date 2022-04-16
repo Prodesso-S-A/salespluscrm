@@ -3,8 +3,8 @@ const mongoose = require("mongoose");
 
 // Creating a Schema for uploaded files
 const ModuloOrganizacionSchema = new mongoose.Schema({
-    idModulo:{ type: Schema.Types.ObjectId , required:true },
-    idOrganizacion:{type: Schema.Types.ObjectId , required:true }
+    idModulo:{ type: String , required:true },
+    idOrganizacion:{type: String , required:true }
 });
 
 // Creating a Model from that Schema
