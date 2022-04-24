@@ -7,10 +7,10 @@ const use = fn => (req, res, next) =>
 router.get('/', use((req, res) => {
     res.render('login',{ title: 'login', layout: 'login' })
 }))
-router.post('/login/signin',passport.authenticate('local',{failureRedirect:'/'}),  function(req, res) {
+router.post('/login/signin',passport.authenticate('local',{failureRedirect:'/',failureFlash:true}),  function(req, res) {
 	res.redirect('../dashboard');
 })
-router.post('/login/unlock',passport.authenticate('local',{failureRedirect:'/'}),  function(req, res) {
+router.post('/login/unlock',passport.authenticate('local',{failureRedirect:'/',failureFlash:true}),  function(req, res) {
 	const {url}=req.body
 	res.redirect(url);
 })

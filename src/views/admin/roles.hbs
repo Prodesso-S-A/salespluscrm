@@ -22,7 +22,8 @@
                                                 <div class="form-input-content">
                                                     <div class="card login-form mb-0">
                                                         <div class="card-body pt-5">
-                                                            <form class="row g-3 needs-validation" action="/rol" method="POST">
+                                                            <form class="row g-3 needs-validation" action="/rol"
+                                                                method="POST">
                                                                 <div class="form-group">
                                                                     <label for="nombre">Nombre del Rol</label>
                                                                     <input type="text" value="{{nombre}}" name="nombre"
@@ -31,7 +32,8 @@
                                                                 </div>
                                                                 <div class="form-group">
                                                                     <label for="organizacion">Organización</label>
-                                                                    <input class="form-control" id="organizacion" name="organizacion">
+                                                                    <input class="form-control" id="organizacion"
+                                                                        name="organizacion">
                                                                     <input type="text"
                                                                         class="form-control visually-hidden" id="idOrg"
                                                                         name="idOrg">
@@ -57,8 +59,9 @@
                                                                                 {{#each ../permiso}}
                                                                                 <td>
                                                                                     <input
-                                                                                        name="{{this.Nombre}}|{{../this.Nombre}}"
-                                                                                        type="checkbox">
+                                                                                        name="Permisos[]"
+                                                                                        value="{{this.Nombre}}|{{../this.Nombre}}"
+                                                                                        type="checkbox" >
                                                                                 </td>
                                                                                 {{/each}}
                                                                             </tr>
@@ -84,58 +87,104 @@
                         </div>
                     </div>
                     <div class="table-responsive">
-                        <table class="table zero-configuration">
+                        <table class="table">
                             <thead>
                                 <tr>
                                     <th class="ancho-columna"></th>
-                                    <th>Rol</th>
+                                    <th >Organización</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                {{#each rol}}
-                                <tr class="accordion-toggle collapsed" id="accordion1" data-toggle="collapse"
-                                    data-parent="#{{nombre}}" href="#{{nombre}}">
+                                {{#each org}}
+                                <tr class="accordion-toggle collapsed" id="#Org{{idOrg}}" data-toggle="collapse"
+                                    data-parent="#Org{{idOrg}}" href="#Org{{idOrg}}">
                                     <td class="expand-button"></td>
-                                    <td>{{nombre}}</td>
+                                    <td>{{Nombre}}</td>
                                 </tr>
                                 <tr class="hide-table-padding">
                                     <td></td>
                                     <td>
-                                        <div id="{{nombre}}" class="collapse in p-3">
+                                        <div id="Org{{idOrg}}" class="collapse in p-3">
                                             <div class="row">
-                                                <div class="col-4">
-                                                    <table class="table-header-rotated">
-                                                        <thead>
-                                                            <tr>
-                                                                <th></th>
-                                                                {{#each ../permiso}}
-                                                                <th class="rotate">
-                                                                    <div><span>{{Nombre}}</span></div>
-                                                                </th>
-                                                                {{/each}}
-                                                            </tr>
-                                                        </thead>
-                                                        <tbody>
-                                                            {{#each ../modulo}}
-                                                            <tr>
-                                                                <th class="row-header">{{this.Nombre}}</th>
-                                                                {{#each ../../permiso}}
-                                                                <td>
-                                                                    {{#each ../../Permisos}}
-                                                                    {{#ifCond this.idModulo ../../this._id}}
-                                                                    {{#ifCond this.idtipoPermiso ../this._id}}
-                                                                        <i class="fa fa-check-circle-o	"></i>
-                                                                    {{/ifCond}}
-                                                                    {{/ifCond}}
-                                                                    {{/each}}
-                                                                </td>
-                                                                {{/each}}
-                                                            </tr>
-                                                            {{/each}}
-                                                        </tbody>
-                                                    </table>
-                                                </div>
+                                                <div class="table-responsive">
+                                                <table class="table-light">
+                                                    <thead>
+                                                        <tr>
+                                                            <th class="ancho-columna"></th>
+                                                            <th>Rol</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        {{#each this.Rol}}
+                                                        <tr class="accordion-toggle collapsed" id="#A{{this._id}}"
+                                                            data-toggle="collapse" data-parent="#A{{this._id}}"
+                                                            href="#A{{this._id}}">
+                                                            <td class="expand-button"></td>
+                                                            <td>{{this.nombre}}</td>
+                                                        </tr>
+                                                        <tr class="hide-table-padding">
+                                                            <td></td>
+                                                            <td>
+                                                                <div id="A{{this._id}}" class="collapse in p-3">
+                                                                    <div class="row">
+                                                                        <div class="col-4">
+                                                                            <table class="table-header-rotated">
+                                                                                <thead>
+                                                                                    <tr>
+                                                                                        <th></th>
+                                                                                        {{#each ../../permiso}}
+                                                                                        <th class="rotate">
+                                                                                            <div><span>{{Nombre}}</span>
+                                                                                            </div>
+                                                                                        </th>
+                                                                                        {{/each}}
+                                                                                    </tr>
+                                                                                </thead>
+                                                                                <tbody>
+                                                                                    {{setVar "idmodulo" ""}}
+                                                                                    {{#each ../../modulo}}
+                                                                                    <tr id="{{this.Nombre}}">
+                                                                                        {{#each ../Permisos}}
+                                                                                        {{#ifCond this.idModulo
+                                                                                        ../this._id}}
+                                                                                        {{#when @root.idmodulo 'noteq'
+                                                                                        ../this._id}}
+                                                                                        {{setVar "idmodulo"
+                                                                                        this.idModulo}}
+                                                                                        <th class="row-header">
+                                                                                            {{../this.Nombre}}</th>
+                                                                                        {{/when}}
+                                                                                        {{/ifCond}}
+                                                                                        {{/each}}
+                                                                                        {{#each ../../../permiso}}
+                                                                                        <td>
+                                                                                            {{#each ../../Permisos}}
+                                                                                            {{#ifCond this.idtipoPermiso
+                                                                                            ../this._id}}
+                                                                                            {{#ifCond this.idModulo
+                                                                                            ../../this._id}}
+                                                                                            <i
+                                                                                                class="fa fa-check-circle-o"></i>
+                                                                                            {{/ifCond}}
+                                                                                            {{/ifCond}}
+                                                                                            {{/each}}
+                                                                                        </td>
+                                                                                        {{/each}}
+                                                                                    </tr>
+                                                                                    {{/each}}
+                                                                                </tbody>
+                                                                            </table>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            </td>
+                                                        </tr>
+                                                        {{/each}}
+                                                    </tbody>
+                                                </table>
                                             </div>
+                                            </div>
+                                            
                                         </div>
                                     </td>
                                 </tr>

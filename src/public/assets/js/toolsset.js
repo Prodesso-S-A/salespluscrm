@@ -1,5 +1,11 @@
 $(document).ready(function () {
     var quantitiy = 0;
+    $("table").each(function(){
+        var curTable = $(this);
+        $(curTable).find('tr').each(function () {
+            if (!$.trim($(this).text())) $(this).remove();
+       });
+      });
     $('.quantity-right-plus').click(function (e) {
         // Stop acting like a button
         e.preventDefault();
@@ -48,7 +54,9 @@ $(document).ready(function () {
                 "password": { required: !0 },
                 "lic": { required: !0 },
                 "rol": { required: !0 },
+                "mod": { required: !0 },
                 "confirm_password": { equalTo: "#password" },
+                "Permisos": {required: true},
             },
             messages: {
                 "idOrg": "Selecciona una Organización",
@@ -64,7 +72,8 @@ $(document).ready(function () {
                 "Modulo": "Escribe el Segmento",
                 "lic": "Selecciona la licencia a asignar",
                 "rol": "Selecciona el Rol",
-                "confirm_password": "Debe coincidir con el password"
+                "mod": "Selecciona el Modulo",
+                "Permisos":  "Selecciona al menos uno"
             }
         });
     //MagicSuggest    
@@ -115,14 +124,14 @@ $(document).ready(function () {
         renderer: function (data) {
             if (data.Activa) {
                 bg = "badge bg-success";
-                valor="Activa";
+                valor = "Activa";
             } else {
                 bg = "badge bg-danger"
-                valor="Inactiva";
+                valor = "Inactiva";
             }
             return '<div class="row"><b class="font-weight-bold small">' + data.Token +
                 '</b></div><div class="row"><b class="font-weight-bold small">Valida desde: ' + moment(data.sinceDate).format("DD/MM/YYYY") +
-                ' Valida hasta: ' + moment(data.expireDate).format("DD/MM/YYYY") + '</b></div><span class="' +bg+'">'+valor+'</span>'
+                ' Valida hasta: ' + moment(data.expireDate).format("DD/MM/YYYY") + '</b></div><span class="' + bg + '">' + valor + '</span>'
         },
         allowFreeEntries: false
     });
@@ -139,16 +148,55 @@ $(document).ready(function () {
         },
         allowFreeEntries: false
     });
+    var mod = $('#modulo').magicSuggest({
+        data: '/modJson',
+        name: 'modulo',
+        maxSelection: 1,
+        valueField: '_id',
+        displayField: 'Nombre',
+        required: true,
+        renderer: function (data) {
+            return data.Nombre;
+        },
+        allowFreeEntries: false
+    });
     $(org).on('selectionchange', function (e, m) {
         $('#idOrg').val(this.getValue())
-        lic.clear();
-        rol.clear();
-        $.post("/licenciaJson", { idOrg: this.getValue() }, function (data) {
-            lic.setData(data)
-        });
-        $.post("/rolJson", { idOrg: this.getValue() }, function (data) {
-            rol.setData(data)
-        });
+        var idOrg = this.getValue()
+        var row = ''
+        if ($("#tblPermisos").length) {
+            $("#tblPermisos").find('tbody').detach();
+            $('#tblPermisos').append($('<tbody>'));
+            $.post("/PermisoJson", { idOrg: idOrg }, function (perm) {
+                $.post("/modOrgJson", { idOrg: idOrg }, function (mod) {
+                    $.each(mod, function (imod, vmod) {
+                        $.each(vmod.Mod, function (immod, vmmod) {
+                            row = ""
+                            row = row + '<tr><th class="row-header">' + vmmod.Nombre + '</th>'
+                            $.each(perm, function (iperm, vperm) {
+                                row = row + '<td><input name="Permisos[]" value="' + vperm.Nombre + '|' + vmmod.Nombre + '" type="checkbox"></td>'
+                            });
+                            row = row + '</tr>'
+                            $("#tblPermisos > tbody").append(row);
+                        });
+
+                    });
+                });
+            });
+
+        }
+        if ($(lic).length) {
+            lic.clear();
+            $.post("/licenciaJson", { idOrg: this.getValue() }, function (data) {
+                lic.setData(data)
+            });
+        }
+        if ($(rol).length) {
+            rol.clear();
+            $.post("/rolJson", { idOrg: this.getValue() }, function (data) {
+                rol.setData(data)
+            });
+        }
     });
     $(mp).on('selectionchange', function (e, m) {
         $('#mp').val(this.getValue())
@@ -156,15 +204,19 @@ $(document).ready(function () {
     $(cls).on('selectionchange', function (e, m) {
         $('#cls').val(this.getValue())
     });
-    $("#licencia").on('selectionchange', function (e, m) {
+    $(lic).on('selectionchange', function (e, m) {
         $('#lic').val(this.getValue())
     });
-    $("#rol").on('selectionchange', function (e, m) {
+    $(mod).on('selectionchange', function (e, m) {
+        $('#mod').val(this.getValue())
+    });
+    $(rol).on('selectionchange', function (e, m) {
         $('#rl').val(this.getValue())
     });
+
     $.validator.addMethod("strong_password", function (value, element) {
         let password = value;
-        if (!(/^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[@#$%&])(.{8,20}$)/.test(password))) {
+        if (!(/^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[.@#$%&])(.{8,20}$)/.test(password))) {
             return false;
         }
         return true;
@@ -182,8 +234,8 @@ $(document).ready(function () {
         else if (!(/^(?=.*[0-9])/.test(password))) {
             return 'Password  debe contener al menos un numero.';
         }
-        else if (!(/^(?=.*[@#$%&])/.test(password))) {
-            return "Password  debe contener al menos un caracer especial(@#$%&).";
+        else if (!(/^(?=.*[.@#$%&])/.test(password))) {
+            return "Password  debe contener al menos un caracer especial(.@#$%&).";
         }
         return false;
     });

@@ -8,6 +8,7 @@ const iconoClass = require('../models/IconoMenu')
 const Licencia = require('../models/Licencias')
 const Permiso = require('../models/Permiso')
 const Modulo = require('../models/Modulo')
+const ModuloOrganizacion = require('../models/ModuloOrganizacion')
 const Organizacion = require('../models/Organizacion')
 const uuid = require('uuid');
 //Usuarios
@@ -23,8 +24,8 @@ router.get('/usuario', use(async (req, res) => {
                 "nombre": 1,
                 "email": 1,
                 "createdAt": 1,
-                "Rol":1,
-                "Licencia":1
+                "Rol": 1,
+                "Licencia": 1
             }
         },
         {
@@ -72,10 +73,27 @@ router.post('/usuario', use(async (req, res) => {
 }))
 // Roles
 router.get('/rol', use(async (req, res) => {
+    const org = await Organizacion.aggregate([
+        {
+            $project: {
+                "idOrg": { "$toString": "$_id" },
+                "Nombre": 1,
+                "_id": 0
+            }
+        },
+        {
+            $lookup: {
+                "localField": "idOrg",
+                "from": "rols",
+                "foreignField": "idOrganizacion",
+                "as": "Rol"
+            }
+        }
+    ])
     const rol = await Rol.find().lean()
     const permiso = await Permiso.find().lean()
     const modulo = await Modulo.find().lean()
-    res.render('./admin/roles', { rol, permiso, modulo })
+    res.render('./admin/roles', { rol, permiso, modulo, org })
 
 }))
 router.post('/rol', use(async (req, res) => {
@@ -84,10 +102,13 @@ router.post('/rol', use(async (req, res) => {
     for (var key in req.body) {
         if (req.body.hasOwnProperty(key)) {
             if (key != 'nombre' && key != 'organizacion' && key != 'idOrg') {
-                p = key.split('|')
-                perm = await Permiso.findOne({ Nombre: p[0] })
-                modulo = await Modulo.findOne({ Nombre: p[1] })
-                permiso.push({ idModulo: modulo._id.valueOf(), idtipoPermiso: perm._id.valueOf(), valor: true })
+                var K = req.body[key]
+               for(let element of K) {
+                    p = element.split('|')
+                    perm = await Permiso.findOne({ Nombre: p[0] })
+                    modulo = await Modulo.findOne({ Nombre: p[1] })
+                    permiso.push({ idModulo: modulo._id.valueOf(), idtipoPermiso: perm._id.valueOf(), valor: true })
+                }
             }
         }
     }
@@ -167,29 +188,50 @@ router.post('/menu', use(async (req, res) => {
 }))
 //moduloorganizacion
 router.get('/moduloorganizacion', use(async (req, res) => {
-    const menu = await Menu.find().lean()
-    res.render('./admin/menus', { menu })
+    const modOrg = await ModuloOrganizacion.aggregate([
+        {
+            $project: {
+                "idOrg": { "$toObjectId": "$idOrganizacion" },
+                "idMod": { "$toObjectId": "$idModulo" }
+            }
+        },
+        {
+            $lookup: {
+                "localField": "idOrg",
+                "from": "organizacions",
+                "foreignField": "_id",
+                "as": "Org"
+            }
+        },
+        {
+            $lookup: {
+                "localField": "idMod",
+                "from": "modulos",
+                "foreignField": "_id",
+                "as": "Mod"
+            }
+        }
+    ])
+    res.render('./admin/moduloorganizacion', { modOrg })
 }))
 router.post('/moduloorganizacion', use(async (req, res) => {
-    const { Nombre, MenuPadre, Class, Segmento, Modulo, Url } = req.body
+    const { idOrg, mod } = req.body
     const errors = []
     if (errors.length > 0) {
-        res.render('menu', { errors, Nombre, MenuPadre, Class, Segmento, Url, Modulo })
+        res.render('moduloorganizacion', { idOrg, mod })
     } else {
-        const menuAdd = await Menu.findOne({ Nombre: Nombre }).lean()
-        if (menuAdd) {
-            req.flash('error_msg', 'Menu ya existe')
-            res.redirect('/menu')
+        const moduloOrgAdd = await ModuloOrganizacion.findOne({ idModulo: mod, idOrganizacion: idOrg }).lean()
+        if (moduloOrgAdd) {
+            req.flash('error_msg', 'Modulo/Organización ya existe')
+            res.redirect('/moduloorganizacion')
         } else {
 
-            const newMenu = new Menu({ Nombre, idMenuPadre: MenuPadre, Class, Segmento, Url, Modulo })
-            await newMenu.save()
-            req.flash('success_msg', 'Menu agregado')
-            res.redirect('/menu')
+            const newModuloOrg = new ModuloOrganizacion({ idModulo: mod, idOrganizacion: idOrg })
+            await newModuloOrg.save()
+            req.flash('success_msg', 'Modulo/Organización agregado')
+            res.redirect('/moduloorganizacion')
         }
-
     }
-
 }))
 //modulo
 router.get('/modulo', use(async (req, res) => {
@@ -291,36 +333,14 @@ router.post('/organizacionlicencia', use(async (req, res) => {
     }
 
 }))
-//usuariorol
-router.get('/usuariorol', use(async (req, res) => {
-    const menu = await Menu.find().lean()
-    res.render('./admin/menus', { menu })
-}))
-router.post('/usuariorol', use(async (req, res) => {
-    const { Nombre, MenuPadre, Class, Segmento, Modulo, Url } = req.body
-    const errors = []
-    if (errors.length > 0) {
-        res.render('menu', { errors, Nombre, MenuPadre, Class, Segmento, Url, Modulo })
-    } else {
-        const menuAdd = await Menu.findOne({ Nombre: Nombre }).lean()
-        if (menuAdd) {
-            req.flash('error_msg', 'Menu ya existe')
-            res.redirect('/menu')
-        } else {
-
-            const newMenu = new Menu({ Nombre, idMenuPadre: MenuPadre, Class, Segmento, Url, Modulo })
-            await newMenu.save()
-            req.flash('success_msg', 'Menu agregado')
-            res.redirect('/menu')
-        }
-
-    }
-
-}))
 //Jsons
 router.post('/iconoJson', use(async (req, res) => {
     const icono = await iconoClass.find().lean()
     res.send(icono)
+}))
+router.post('/PermisoJson', use(async (req, res) => {
+    const permiso = await Permiso.find().lean()
+    res.send(permiso)
 }))
 router.post('/orgJson', use(async (req, res) => {
     const organizacion = await Organizacion.find().lean()
@@ -330,10 +350,43 @@ router.post('/menuJson', use(async (req, res) => {
     const menu = await Menu.distinct("idMenuPadre").lean()
     res.send(menu)
 }))
+router.post('/modJson', use(async (req, res) => {
+    const modulo = await Modulo.find().lean()
+    res.send(modulo)
+}))
 router.post('/rolJson', use(async (req, res) => {
     const { idOrg } = req.body
     const rol = await Rol.find({ idOrganizacion: idOrg }).lean()
     res.send(rol)
+}))
+router.post('/modOrgJson', use(async (req, res) => {
+    const { idOrg } = req.body
+    const modOrg = await ModuloOrganizacion.aggregate([
+        { $match: { idOrganizacion: idOrg[0] } },
+        {
+            $project: {
+                "idOrg": { "$toObjectId": "$idOrganizacion" },
+                "idMod": { "$toObjectId": "$idModulo" }
+            }
+        },
+        {
+            $lookup: {
+                "localField": "idOrg",
+                "from": "organizacions",
+                "foreignField": "_id",
+                "as": "Org"
+            }
+        },
+        {
+            $lookup: {
+                "localField": "idMod",
+                "from": "modulos",
+                "foreignField": "_id",
+                "as": "Mod"
+            }
+        }
+    ])
+    res.send(modOrg)
 }))
 router.post('/licenciaJson', use(async (req, res) => {
     const { idOrg } = req.body

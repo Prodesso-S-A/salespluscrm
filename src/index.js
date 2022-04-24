@@ -42,12 +42,12 @@ hbs.handlebars.registerHelper('json', function (obj) {
     return new Handlebars.SafeString(JSON.stringify(obj))
 })
 hbs.handlebars.registerHelper("porcentajeAvance", function (fi, ff, options) {
-    var moment = require('moment');  
-    var FI = moment(moment(fi).format('L')); 
-    var FF = moment(moment(ff).format('L'));
-    var FH = moment(moment().format('L'));
-    var meta=FF.diff(FI, 'days')
-    var real=FH.diff(FI, 'days')
+    var moment = require('moment');
+    var FI = moment(moment(fi).format('MM/DD/YY'));
+    var FF = moment(moment(ff).format('MM/DD/YY'));
+    var FH = moment(moment(Date.now()).format('MM/DD/YY'));
+    var meta = FF.diff(FI, 'days')
+    var real = FH.diff(FI, 'days')
     var porc = (real / meta) * 100
     if (!options.data.root) {
         options.data.root = {};
@@ -55,22 +55,25 @@ hbs.handlebars.registerHelper("porcentajeAvance", function (fi, ff, options) {
     options.data.root["Porcentaje"] = porc;
     return Math.floor(porc)
 });
-hbs.handlebars.registerHelper( "when",function(operand_1, operator, operand_2, options) {
+hbs.handlebars.registerHelper("setVar", function (varName, varValue, options) {
+    options.data.root[varName] = varValue;
+});
+hbs.handlebars.registerHelper("when", function (operand_1, operator, operand_2, options) {
 
     var operators = {
-     'eq': function(l,r) { return l == r; },
-     'noteq': function(l,r) { return l != r; },
-     'gt': function(l,r) { return Number(l) > Number(r); },
-     'gteq': function(l,r) { return Number(l) >= Number(r); },
-     'or': function(l,r) { return l || r; },
-     'and': function(l,r) { return l && r; },
-     '%': function(l,r) { return (l % r) === 0; }
+        'eq': function (l, r) { return l == r; },
+        'noteq': function (l, r) { return l != r; },
+        'gt': function (l, r) { return Number(l) > Number(r); },
+        'gteq': function (l, r) { return Number(l) >= Number(r); },
+        'or': function (l, r) { return l || r; },
+        'and': function (l, r) { return l && r; },
+        '%': function (l, r) { return (l % r) === 0; }
     }
-    , result = operators[operator](operand_1,operand_2);
-  
+        , result = operators[operator](operand_1, operand_2);
+
     if (result) return options.fn(this);
-    else  return options.inverse(this);
-  });
+    else return options.inverse(this);
+});
 //Midelwares
 app.use(express.urlencoded({ extended: true }));
 app.use(methodOverride('_method'));
