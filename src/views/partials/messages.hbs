@@ -25,3 +25,12 @@
 		})
 </script>
 {{/if}}
+{{#if warning_msg}}
+<script>
+		Swal.fire({
+			title: 'Alerta!',
+			text: '{{warning_msg}}',
+			icon: 'warning'
+		})
+</script>
+{{/if}}

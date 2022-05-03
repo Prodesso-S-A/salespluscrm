@@ -45,7 +45,6 @@ router.get('/usuario', use(async (req, res) => {
             }
         }
     ])
-    console.log(usuario)
     res.render('./admin/usuarios', { usuario })
 }))
 router.post('/usuario', use(async (req, res) => {
@@ -103,7 +102,7 @@ router.post('/rol', use(async (req, res) => {
         if (req.body.hasOwnProperty(key)) {
             if (key != 'nombre' && key != 'organizacion' && key != 'idOrg') {
                 var K = req.body[key]
-               for(let element of K) {
+                for (let element of K) {
                     p = element.split('|')
                     perm = await Permiso.findOne({ Nombre: p[0] })
                     modulo = await Modulo.findOne({ Nombre: p[1] })
@@ -166,7 +165,7 @@ router.get('/menu', use(async (req, res) => {
     res.render('./admin/menus', { menu })
 }))
 router.post('/menu', use(async (req, res) => {
-    const { nombre, Segmento, Modulo, Url, menuPadre, Class } = req.body
+    const { nombre, Segmento, mod, Url, menuPadre, Class } = req.body
     const errors = []
     if (errors.length > 0) {
         res.render('menu', { errors, Nombre, MenuPadre, Class, Segmento, Url, Modulo })
@@ -177,7 +176,7 @@ router.post('/menu', use(async (req, res) => {
             res.redirect('/menu')
         } else {
 
-            const newMenu = new Menu({ Nombre: nombre, idMenuPadre: menuPadre[0], Class: Class[0], Segmento, Url, Modulo })
+            const newMenu = new Menu({ Nombre: nombre, idMenuPadre: menuPadre[0], Class: Class[0], Segmento, Url, Modulo: mod, idOrganizacion: req.user.idOrganizacion })
             await newMenu.save()
             req.flash('success_msg', 'Menu agregado')
             res.redirect('/menu')
@@ -383,6 +382,36 @@ router.post('/modOrgJson', use(async (req, res) => {
                 "from": "modulos",
                 "foreignField": "_id",
                 "as": "Mod"
+            }
+        }
+    ])
+    console.log(modOrg)
+    res.send(modOrg)
+}))
+router.post('/modsOrgJson', use(async (req, res) => {
+    const { idOrg } = req.body
+    console.log(idOrg)
+    const modOrg = await ModuloOrganizacion.aggregate([
+        { $match: { idOrganizacion: idOrg[0] } },
+        {
+            $project: {
+                "idMod": { "$toObjectId": "$idModulo" }
+            }
+        },
+        {
+            $lookup: {
+                "localField": "idMod",
+                "from": "modulos",
+                "foreignField": "_id",
+                "as": "mods"
+            }
+        },
+        {
+            $replaceRoot: { newRoot: { $mergeObjects: [{ $arrayElemAt: ["$mods",0] }, "$$ROOT"] } }
+        },
+        {
+            $project:{
+                "mods":0
             }
         }
     ])

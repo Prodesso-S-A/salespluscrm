@@ -8,6 +8,7 @@ const menuSchema = new mongoose.Schema({
     Nombre:{type:String, required:true},
     Url:{type:String, required:true},
     Segmento:{type:String, required:true},
+    idOrganizacion:{type:String, required:true},
     Modulo:{type:String, required:true}
 });
 

@@ -23,6 +23,14 @@
                                                     <div class="card login-form mb-0">
                                                         <div class="card-body pt-5">
                                                             <form class="row g-3 needs-validation" action="/menu" method="POST">
+                                                            <div class="form-group">
+                                                                    <label for="organizacion">Organización</label>
+                                                                    <input class="form-control" id="organizacion"
+                                                                        name="organizacion">
+                                                                    <input type="text"
+                                                                        class="form-control visually-hidden" id="idOrg"
+                                                                        name="idOrg">
+                                                                </div>
                                                                 <div class="form-group">
                                                                     <label for="MenuPadre">Menu padre</label>
                                                                     <input class="form-control" id="menuPadre" name="menuPadre">
@@ -55,11 +63,13 @@
                                                                         class="form-control" id="Url"
                                                                         placeholder="Escribe la url">
                                                                 </div>
-                                                                <div class="form-group">
-                                                                    <label for="Modulo">Modulo</label>
-                                                                    <input type="text" value="{{Modulo}}" name="Modulo"
-                                                                        class="form-control" id="Modulo"
-                                                                        placeholder="Escribe el Modulo">
+                                                                 <div class="form-group">
+                                                                    <label for="moduloorg">Modulo</label>
+                                                                    <input class="form-control" id="moduloorg"
+                                                                        name="moduloorg">
+                                                                    <input type="text"
+                                                                        class="form-control visually-hidden" id="mod"
+                                                                        name="mod">
                                                                 </div>
                                                                 <div class="modal-footer">
                                                                     <button type="submit"

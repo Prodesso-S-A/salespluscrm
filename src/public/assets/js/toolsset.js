@@ -160,6 +160,19 @@ $(document).ready(function () {
         },
         allowFreeEntries: false
     });
+    var modorg = $('#moduloorg').magicSuggest({
+        data: '/modsOrgJson',
+        dataUrlParams: { idOrg: $('#idOrg').val() },
+        name: 'modulo',
+        maxSelection: 1,
+        valueField: '_id',
+        displayField: 'Nombre',
+        required: true,
+        renderer: function (data) {
+            return data.Nombre;
+        },
+        allowFreeEntries: false
+    });
     $(org).on('selectionchange', function (e, m) {
         $('#idOrg').val(this.getValue())
         var idOrg = this.getValue()
@@ -197,6 +210,12 @@ $(document).ready(function () {
                 rol.setData(data)
             });
         }
+        if ($(modorg).length) {
+            modorg.clear();
+            $.post("/modsOrgJson", { idOrg: this.getValue() }, function (data) {
+                modorg.setData(data)
+            });
+        }
     });
     $(mp).on('selectionchange', function (e, m) {
         $('#mp').val(this.getValue())
@@ -208,6 +227,9 @@ $(document).ready(function () {
         $('#lic').val(this.getValue())
     });
     $(mod).on('selectionchange', function (e, m) {
+        $('#mod').val(this.getValue())
+    });
+    $(modorg).on('selectionchange', function (e, m) {
         $('#mod').val(this.getValue())
     });
     $(rol).on('selectionchange', function (e, m) {
