@@ -8,7 +8,7 @@ const iconoClass = require('../models/IconoMenu')
 const Licencia = require('../models/Licencias')
 const Permiso = require('../models/Permiso')
 const Modulo = require('../models/Modulo')
-const ModuloOrganizacion = require('../models/ModuloOrganizacion')
+const ModuloOrganizacion = require('../models/Moduloorganizacion')
 const Organizacion = require('../models/Organizacion')
 const uuid = require('uuid');
 //Usuarios
