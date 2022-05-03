@@ -20,6 +20,7 @@ router.get('/usuario', use(async (req, res) => {
         {
             $project: {
                 "idOrg": { "$toObjectId": "$idOrganizacion" },
+                "idRol": { "$toObjectId": "$Rol" },
                 "_id": 0,
                 "nombre": 1,
                 "email": 1,
@@ -38,10 +39,26 @@ router.get('/usuario', use(async (req, res) => {
         },
         {
             $lookup: {
+                "localField": "idRol",
+                "from": "rols",
+                "foreignField": "_id",
+                "as": "Rol"
+            }
+        },
+        {
+            $lookup: {
                 "localField": "Licencia",
                 "from": "licencias",
                 "foreignField": "Token",
                 "as": "Lic"
+            }
+        },
+        {
+            $replaceRoot: { newRoot: { $mergeObjects: [{ $arrayElemAt: ["$Rol",0] }, "$$ROOT"] } }
+        },
+        {
+            $project:{
+                "Rol":0
             }
         }
     ])
