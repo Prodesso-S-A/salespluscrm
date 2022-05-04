@@ -49,14 +49,11 @@ hbs.handlebars.registerHelper("porcentajeAvance", function (fi, ff, options) {
     var meta = FF.diff(FI, 'days')
     var real = FH.diff(FI, 'days')
     var porc = (real / meta) * 100
-    console.log(meta)
-    console.log(real)
-    console.log(FI)
-    console.log(FF)
-    console.log(FH)
-    console.log(porc)
     if (!options.data.root) {
         options.data.root = {};
+    }
+    if(porc<0){
+        porc=0
     }
     options.data.root["Porcentaje"] = porc;
     return Math.floor(porc)
