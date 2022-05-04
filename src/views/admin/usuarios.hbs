@@ -100,7 +100,9 @@
                                     <th>Nombre</th>
                                     <th>Correo</th>
                                     <th>Organización</th>
-                                    <th>Fecha de creación</th>
+                                    <th>Fecha de creación del Usuario</th>
+                                    <th>Fecha efectiva de licencia</th>
+                                    <th>Fecha expiración licencia</th>
                                     <th>Rol</th>
                                     <th>Duración de Licencia</th>
                                     <th>Status de Licencia</th>
@@ -109,18 +111,20 @@
                             <tbody>
                                 {{#each usuario}}
                                 <tr>
-                                    <td>{{nombre}}</td>
+                                    <td>{{User}}</td>
                                     <td>{{email}}</td>
                                     {{#each this.Org}}
                                     <td>{{this.Nombre}}</td>
                                     {{/each}}
                                     <td>{{dateFormat createdAt "DD/MM/yyyy, h:mm:ss a" utc}}</td>
-                                    <td>{{Rol}}</td>
+                                    <td>{{dateFormat sinceDate "DD/MM/yyyy, h:mm:ss a" utc}}</td>
+                                    <td>{{dateFormat expireDate "DD/MM/yyyy, h:mm:ss a" utc}}</td>
+                                    <td>{{nombre}}</td>
                                     {{#each this.Lic}}
                                     <td>
                                         <div class="progress" style="height: 10px">
                                             <div class="progress-bar gradient-1"
-                                                style="width: {{porcentajeAvance this.expireDate this.sinceDate}}%;"
+                                                style="width: {{porcentajeAvance this.sinceDate this.expireDate }}%;"
                                                 role="progressbar">
                                             </div>
                                         </div>

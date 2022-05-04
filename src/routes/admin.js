@@ -21,12 +21,9 @@ router.get('/usuario', use(async (req, res) => {
             $project: {
                 "idOrg": { "$toObjectId": "$idOrganizacion" },
                 "idRol": { "$toObjectId": "$Rol" },
-                "_id": 0,
-                "nombre": 1,
-                "email": 1,
-                "createdAt": 1,
-                "Rol": 1,
-                "Licencia": 1
+                "User":"$nombre",
+                "Token":1,
+                "Licencia":1
             }
         },
         {
@@ -39,14 +36,6 @@ router.get('/usuario', use(async (req, res) => {
         },
         {
             $lookup: {
-                "localField": "idRol",
-                "from": "rols",
-                "foreignField": "_id",
-                "as": "Rol"
-            }
-        },
-        {
-            $lookup: {
                 "localField": "Licencia",
                 "from": "licencias",
                 "foreignField": "Token",
@@ -54,14 +43,26 @@ router.get('/usuario', use(async (req, res) => {
             }
         },
         {
-            $replaceRoot: { newRoot: { $mergeObjects: [{ $arrayElemAt: ["$Rol",0] }, "$$ROOT"] } }
+            $lookup: {
+                "localField": "idRol",
+                "from": "rols",
+                "foreignField": "_id",
+                "as": "roles"
+            }
+        },
+        {
+            $replaceRoot: { newRoot: { $mergeObjects: [{ $arrayElemAt: ["$roles",0] }, "$$ROOT"] } }
+        },
+        {
+            $replaceRoot: { newRoot: { $mergeObjects: [{ $arrayElemAt: ["$Lic",0] }, "$$ROOT"] } }
         },
         {
             $project:{
-                "Rol":0
+                "roles":0
             }
         }
     ])
+    console.log(usuario)
     res.render('./admin/usuarios', { usuario })
 }))
 router.post('/usuario', use(async (req, res) => {
