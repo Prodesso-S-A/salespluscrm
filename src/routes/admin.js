@@ -22,6 +22,7 @@ router.get('/usuario', use(async (req, res) => {
                 "idOrg": { "$toObjectId": "$idOrganizacion" },
                 "idRol": { "$toObjectId": "$Rol" },
                 "User":"$nombre",
+                "email":1,
                 "Token":1,
                 "Licencia":1
             }
@@ -325,7 +326,7 @@ router.get('/organizacionlicencia', use(async (req, res) => {
 router.post('/organizacionlicencia', use(async (req, res) => {
     const { idOrg, quantity, tipolicencia, fecha } = req.body
     const errors = []
-    fexp = new Date()
+    fexp = new Date(fecha)
     fsince = new Date(fecha)
     console.log(req.body)
     if (errors.length > 0) {
