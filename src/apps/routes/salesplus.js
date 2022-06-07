@@ -8,7 +8,7 @@ const { v4: uuidv4 } = require('uuid');
 // ⇨ '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed'
 const multerStorage = multer.diskStorage({
     destination: (req, file, cb) => {
-        cb(null, "./src/app/public/files");
+        cb(null, "./src/apps/public/files");
     },
     filename: (req, file, cb) => {
         const ext = file.mimetype.split("/")[1];

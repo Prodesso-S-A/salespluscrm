@@ -4,7 +4,7 @@ const app = express();
 const { create } = require('express-handlebars');
 // Settings
 app.set('port', process.env.PORT || 3000);
-var dir = __dirname.replace('server', 'app')
+var dir = __dirname.replace('server', 'apps')
 app.set('dir', dir)
 app.set('views', path.join(app.get('dir'), 'views'));
 app.use(express.static(path.join(app.get('dir'), 'public')))
