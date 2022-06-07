@@ -7,9 +7,13 @@ const passport = require('passport')
 let RedisStore = require("connect-redis")(sessions)
 // redis@v4
 const { createClient } = require("redis")
-let redisClient = createClient({ 
-    host: 'ec2-3-226-70-204.compute-1.amazonaws.com',
-    port: '29720' })
+let redisClient = createClient({
+    url: "redis://:p00f050a78710f2cd2f889f4b7e6d6d2b8c182bab3553a98b6939a45f7e9d85f1@ec2-3-226-70-204.compute-1.amazonaws.com:29720",
+    socket: {
+        tls: true,
+        rejectUnauthorized: false
+    }
+})
 redisClient.connect().catch(console.error)
 
 module.exports = function (app) {
