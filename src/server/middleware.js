@@ -7,7 +7,10 @@ const passport = require('passport')
 let RedisStore = require("connect-redis")(sessions)
 // redis@v4
 const { createClient } = require("redis")
-let redisClient = createClient({ legacyMode: true })
+let redisClient = createClient({ 
+    host: 'ec2-3-226-70-204.compute-1.amazonaws.com',
+    port: '29720',
+    legacyMode: true })
 redisClient.connect().catch(console.error)
 
 module.exports = function (app) {
