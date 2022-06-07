@@ -2,7 +2,7 @@ const express = require('express');
 const methodOverride = require('method-override');
 const sessions = require('express-session');
 const flash = require('connect-flash');
-const config = require('../app/config')
+const config = require('../apps/config')
 const passport = require('passport')
 let RedisStore = require("connect-redis")(sessions)
 // redis@v4

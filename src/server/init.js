@@ -1,6 +1,6 @@
 //Init
 require('./database')
-require('../app/config/passport')
+require('../apps/config/passport')
 const app = require('./settings').app
 var hbs = require('./settings').hbs
 

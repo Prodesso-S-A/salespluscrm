@@ -1,7 +1,7 @@
 //Routes
-const Routes = require('../app/routes')
-require('../app/config/auth')
-require('../app/config/permission')
+const Routes = require('../apps/routes')
+require('../apps/config/auth')
+require('../apps/config/permission')
 module.exports = function (app) {
     app.use(Routes.jsons)
     app.use(Routes.initPublic)

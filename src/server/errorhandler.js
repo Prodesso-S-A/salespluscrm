@@ -1,4 +1,4 @@
-const Error = require('../app/models/global/Error')
+const Error = require('../apps/models/global/Error')
 
 module.exports = function (app) {
     Number.prototype.padLeft = function (base, chr) {
