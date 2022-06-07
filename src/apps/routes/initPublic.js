@@ -7,7 +7,7 @@ router.get('/', (req, res) => {
     res.render('./login', { title: 'login', layout: 'login' })
 })
 router.post('/login/signin', passport.authenticate('local', { failureRedirect: '/', failureFlash: true }), async function (req, res) {
-    var sessionArr = [{ id: '0', sesiones: 0 }]
+ /*    var sessionArr = [{ id: '0', sesiones: 0 }]
     var ses = []
     await req.sessionStore.all((err, sessions) => {
         if (sessions != undefined) {
@@ -33,7 +33,8 @@ router.post('/login/signin', passport.authenticate('local', { failureRedirect: '
             res.redirect('../validaLicencias');
         }
 
-    })
+    }) */
+    res.redirect('../validaLicencias');
 })
 router.post('/login/unlock', passport.authenticate('local', { failureRedirect: '/', failureFlash: true }), function (req, res) {
     const { url } = req.body
