@@ -17,8 +17,8 @@ let redisClient = createClient({
 redisClient.connect().catch(console.error)
 
 module.exports = function (app) {
-    //redisClient.on('connect', () => console.log('Redis Client Connected'));
-    //redisClient.on('error', (err) => console.log('Redis Client Connection Error', err));
+    redisClient.on('connect', () => console.log('Redis Client Connected'));
+    redisClient.on('error', (err) => console.log('Redis Client Connection Error', err));
     app.use(express.urlencoded({ extended: true }));
     app.use(methodOverride(function (req, res) {
         if (req.body && typeof req.body === 'object' && '_method' in req.body) {
@@ -31,7 +31,7 @@ module.exports = function (app) {
     app.use(sessions({
         secret: 'pr0de$$0',
         resave: true,
-        //store: new RedisStore({ client: redisClient }),
+        store: new RedisStore({ client: redisClient }),
         saveUninitialized: false,
         cookie: { _expires: 18000 }, // time im ms
     }));
