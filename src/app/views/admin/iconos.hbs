@@ -1,0 +1,71 @@
+<div class="container-fluid mt-3">
+    <div class="card">
+        <div class="card-body">
+            <h4 class="card-title">Iconos</h4>
+            <div class="button-icon">
+                <button type="button" class="btn mb-1 btn-primary" data-toggle="modal"
+                    data-target=".add-user">Agregar<span class="btn-icon-right"><i class="icon-plus"></i></span>
+                </button>
+                <div class="modal fade add-user" tabindex="-1" role="dialog" aria-hidden="true">
+                    <div class="modal-dialog modal-lg">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title">Añadir Icono</h5>
+                                <button type="button" class="close" data-dismiss="modal"><span>&times;</span>
+                                </button>
+                            </div>
+                            <div class="login-form-bg h-100">
+                                <div class="container h-100">
+                                    <div class="row justify-content-center h-100">
+                                        <div class="col-xl-12">
+                                            <div class="form-input-content">
+                                                <div class="card login-form mb-0">
+                                                    <div class="card-body pt-5">
+                                                        <form id="submit" class="row g-3 needs-validation" action="/icono"
+                                                            method="POST">
+                                                            <div class="form-group">
+                                                                <label for="IconoClass">Clase del Icono</label>
+                                                                <input type="text" value="{{IconoClass}}"
+                                                                    name="IconoClass" class="form-control"
+                                                                    id="IconoClass"
+                                                                    placeholder="Escribe la clase del icono">
+                                                            </div>
+                                                            <div class="modal-footer">
+                                                                <button type="submit"
+                                                                    class="btn login-form__btn submit w-100">Crear
+                                                                    Icono</button>
+                                                            </div>
+                                                        </form>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-striped table-bordered zero-configuration">
+                        <thead>
+                            <tr>
+                                <th>Nombre</th>
+                                <th>Icono</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {{#each icono}}
+                            <tr>
+                                <td>{{iconoClass}}</td>
+                                <td><i class="{{iconoClass}}"></i></td>
+                            </tr>
+                            {{/each}}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

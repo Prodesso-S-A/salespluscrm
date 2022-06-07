@@ -1,0 +1,24 @@
+<div class="nk-sidebar">
+    <div class="nk-nav-scroll">
+        <ul class="metismenu" id="menu">
+            {{#if user}}
+            {{#each user.userMenu}}
+            {{#each this.Ligas}}
+            <li class="nav-label">{{this.Segmento}}</li>
+            {{#each this.MenuPadre}}
+            <li class="mega-menu mega-menu-sm">
+                <a class="has-arrow" href="javascript:void()" aria-expanded="false">
+                    <i class="{{this.Menu.iconoPadre}}"></i>
+                    <span class="nav-text">{{this.NombreMenuPadre}}</span>
+                </a>
+                <ul aria-expanded="false">
+                    <li><a href="{{this.Menu.Url}}"><i class="{{this.Menu.icono}}"></i>{{this.Menu.NombreMenu}}</a></li>
+                </ul>
+            </li>
+            {{/each}}
+            {{/each}}
+            {{/each}}
+            {{/if}}
+        </ul>
+    </div>
+</div>

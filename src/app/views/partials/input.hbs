@@ -1,0 +1,38 @@
+{{#with input}}
+{{#switch tipo}}
+{{#case 'input'}}
+<div class="form-group">
+    <label for="{{valor}}">{{titulo}}</label>
+    <input type="text" name="{{valor}}" class="form-control" id="{{valor}}" placeholder="{{ph}}">
+</div>
+{{/case}}
+{{#case 'email'}}
+<div class="form-group">
+    <label for="{{valor}}">{{titulo}}</label>
+    <input type="email" name="{{valor}}" class="form-control" id="{{valor}}" required="required" placeholder="{{ph}}"
+        email="email">
+</div>
+{{/case}}
+{{#case 'password'}}
+<div class="form-group">
+    <label for="{{valor}}">{{titulo}}</label>
+    <input type="{{valor}}" name="{{valor}}" class="form-control" id="{{valor}}" placeholder="{{ph}}"
+        strong_password="strong_password">
+</div>
+{{/case}}
+{{#case 'color'}}
+<div class="form-group">
+    <label for="{{valor}}">{{titulo}}</label>
+    <input type="input" name="{{valor}}" class="colorpicker form-control" id="{{valor}}" 
+        >
+</div>
+{{/case}}
+{{#case 'ms'}}
+<div class="form-group">
+    <label for="{{valor}}">{{titulo}}</label>
+    <input class="form-control" id="{{valor}}" name="{{valor}}">
+    <input type="text" class="form-control visually-hidden" id="{{vhidden}}" name="{{vhidden}}">
+</div>
+{{/case}}
+{{/switch}}
+{{/with}}

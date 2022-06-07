@@ -1,0 +1,55 @@
+<script src="https://cdn.jsdelivr.net/gh/RubaXa/Sortable/Sortable.min.js"></script>
+<div class="container-fluid mt-3">
+    <div class="card">
+        <div class="card-body">
+            <h4 class="card-title">Embudo</h4>
+            <div class="button-icon">
+                {{#each control}}
+                {{> boton boton=boton}}
+                {{> modal modal=modal}}
+                {{/each}}
+                <div class="container-fluid">
+                    <div class="row">
+                        {{#each data}}
+                        <div class="col">
+                            <div class="card rounded">
+                                <div class="rounded" style="background-color:{{colorTag}};">
+                                    <h6 class="ms-2 mt-2 mb-2" style="color:{{contrastColor colorTag}}">{{Tag}}
+                                    </h6>
+                                </div>
+                                <div class="card-body p-0 shadow bg-white rounded" style="border-color:{{colorTag}}">
+                                    <ul class="list-group" id="{{idTag}}">
+                                        {{#each clientes}}
+                                        <li class="list-group-item "  id="{{idCliente}}">{{nombreCliente}}</li>
+                                        {{/each}}
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                        {{/each}}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    var list = document.getElementsByClassName("list-group");
+    for (var i = 0; i < list.length; i++) {
+        Sortable.create(list[i], {
+            animation: 100,
+            group: 'list-1',
+            draggable: '.list-group-item',
+            handle: '.list-group-item',
+            sort: true,
+            filter: '.sortable-disabled',
+            chosenClass: 'active',
+            onEnd: function (/**Event*/evt) {
+                $.post('/clienteUpdate', { tag: evt.to.id, cliente: evt.item.id },
+                    function (returnedData) {
+                    });
+            },
+        });
+    }
+
+</script>

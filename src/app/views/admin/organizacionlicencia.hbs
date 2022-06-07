@@ -1,0 +1,114 @@
+<div class="container-fluid mt-3">
+    <div class="card">
+        <div class="card-body">
+            <h4 class="card-title">Organización - Licencias</h4>
+            <div class="button-icon">
+                <button type="button" class="btn mb-1 btn-primary" data-toggle="modal"
+                    data-target=".add-user">Agregar<span class="btn-icon-right"><i class="icon-plus"></i></span>
+                </button>
+                <div class="modal fade add-user" tabindex="-1" role="dialog" aria-hidden="true">
+                    <div class="modal-dialog modal-lg">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title">Añadir Licencia</h5>
+                                <button type="button" class="close" data-dismiss="modal"><span>&times;</span>
+                                </button>
+                            </div>
+                            <div class="login-form-bg h-100">
+                                <div class="container h-100">
+                                    <div class="row justify-content-center h-100">
+                                        <div class="col-xl-12">
+                                            <div class="form-input-content">
+                                                <div class="card login-form mb-0">
+                                                    <div class="card-body pt-5">
+                                                        <form id="submit" class="row g-3 needs-validation"
+                                                            action="/organizacionlicencia" method="POST">
+                                                            <div class="form-group">
+                                                                <label for="organizacion">Organización</label>
+                                                                <input type="text" class="form-control"
+                                                                    id="organizacion" name="organizacion">
+                                                                <input type="text" class="form-control visually-hidden"
+                                                                    id="idOrg" name="idOrg">
+                                                            </div>
+                                                            <div class="form-group">
+                                                                <label for="Nombre">Cantidad de Licencias</label>
+                                                                <div class="input-group">
+                                                                    <span class="input-group-btn">
+                                                                        <button type="button"
+                                                                            class="quantity-left-minus  btn mb-1 btn-outline-primary"
+                                                                            data-type="minus" data-field="">
+                                                                            <span class="fa fa-minus"></span>
+                                                                        </button>
+                                                                    </span>
+                                                                    <input type="number" min="1" id="quantity"
+                                                                        name="quantity"
+                                                                        class="form-control mx-sm-3 mb-5 input-number"
+                                                                        value="0">
+                                                                    <span class="input-group-btn">
+                                                                        <button type="button"
+                                                                            class="quantity-right-plus  btn mb-1 btn-outline-primary"
+                                                                            data-type="plus" data-field="">
+                                                                            <span class="fa fa-plus"></span>
+                                                                        </button>
+                                                                    </span>
+                                                                </div>
+                                                            </div>
+                                                            <div class="form-group">
+                                                                <label for="tipolicencia">Tipo de Licencias</label>
+                                                                <div class="input-group">
+                                                                    <label class="radio-inline mr-3">
+                                                                        <input type="radio" name="tipolicencia"
+                                                                            value="Mensual">Mensual</label>
+                                                                    <label class="radio-inline mr-3">
+                                                                        <input type="radio" name="tipolicencia"
+                                                                            value="Anual">Anual</label>
+                                                                    <label class="radio-inline">
+                                                                        <input type="radio" name="tipolicencia"
+                                                                            value="Temporal">Temporal</label>
+                                                                </div>
+                                                            </div>
+                                                            <div class="form-group">
+                                                                <label class="m-t-20">Fecha Efectiva</label>
+                                                                <input type="text" class="form-control" name="fecha"
+                                                                    id="fecha">
+                                                            </div>
+
+                                                            <div class="modal-footer">
+                                                                <button id="crear" type="submit"
+                                                                    class="btn login-form__btn submit w-100">Agregar
+                                                                    Licencias</button>
+                                                            </div>
+                                                        </form>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+                <div class="table-responsive">
+                    <table class="table zero-configuration">
+                        <thead>
+                            <tr>
+                                <th>Nombre</th>
+                                <th>Total de Licencias</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {{#each licencias}}
+                            <tr>
+                                <td>{{Nombre}}</td>
+                                <td>{{total}}</td>
+                            </tr>
+                            {{/each}}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

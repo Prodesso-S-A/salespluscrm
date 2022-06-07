@@ -1,0 +1,74 @@
+<div class="container-fluid mt-3">
+    <div class="card">
+        <div class="card-body">
+            <h4 class="card-title">Modulos</h4>
+            <div class="button-icon">
+                <button type="button" class="btn mb-1 btn-primary" data-toggle="modal"
+                    data-target=".add-user">Agregar<span class="btn-icon-right"><i class="icon-plus"></i></span>
+                </button>
+                <div class="modal fade add-user" tabindex="-1" role="dialog" aria-hidden="true">
+                    <div class="modal-dialog modal-lg">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title">Añadir rol</h5>
+                                <button type="button" class="close" data-dismiss="modal"><span>&times;</span>
+                                </button>
+                            </div>
+                            <div class="login-form-bg h-100">
+                                <div class="container h-100">
+                                    <div class="row justify-content-center h-100">
+                                        <div class="col-xl-12">
+                                            <div class="form-input-content">
+                                                <div class="card login-form mb-0">
+                                                    <div class="card-body pt-5">
+                                                        <form id="submit" action="/modulo" class="row g-3 needs-validation" method="POST">
+                                                            <div class="form-group">
+                                                                <label for="nombre">Nombre del Modulo</label>
+                                                                <input type="text" value="{{Nombre}}" name="nombre"
+                                                                    class="form-control" id="nombre"
+                                                                    placeholder="Escribe el nombre del Modulo">
+                                                            </div>
+                                                            <div class="form-group">
+                                                                <label for="Url">URL</label>
+                                                                <input class="form-control" id="Url"
+                                                                    name="Url">
+                                                                <input type="text" class="form-control visually-hidden"
+                                                                    id="uri" name="uri">
+                                                            </div>
+                                                            <div class="modal-footer">
+                                                                <button type="submit"
+                                                                    class="btn login-form__btn submit w-100">Crear
+                                                                    Modulo</button>
+                                                            </div>
+                                                        </form>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-striped table-bordered zero-configuration">
+                        <thead>
+                            <tr>
+                                <th>Modulo</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {{#each modulo}}
+                            <tr>
+                                <td>{{Nombre}}</td>
+                            </tr>
+                            {{/each}}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

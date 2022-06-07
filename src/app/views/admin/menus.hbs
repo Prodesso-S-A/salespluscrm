@@ -1,0 +1,139 @@
+<div class="container-fluid mt-3">
+    <div class="card">
+        <div class="card-body">
+            <h4 class="card-title">Menu</h4>
+            <div class="button-icon">
+                <button type="button" class="btn mb-1 btn-primary" data-toggle="modal"
+                    data-target=".add-user">Agregar<span class="btn-icon-right"><i class="icon-plus"></i></span>
+                </button>
+                <div class="modal fade add-user" tabindex="-1" role="dialog" aria-hidden="true">
+                    <div class="modal-dialog modal-lg">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title">Añadir Menu</h5>
+                                <button type="button" class="close" data-dismiss="modal"><span>&times;</span>
+                                </button>
+                            </div>
+                            <div class="login-form-bg h-100">
+                                <div class="container h-100">
+                                    <div class="row justify-content-center h-100">
+                                        <div class="col-xl-12">
+                                            <div class="form-input-content">
+                                                <div class="card login-form mb-0">
+                                                    <div class="card-body pt-5">
+                                                        <form id="submit" class="row g-3 needs-validation"
+                                                            action="/menu" method="POST">
+                                                            <div class="form-group">
+                                                                <label for="organizacion">Organización</label>
+                                                                <input class="form-control" id="organizacion"
+                                                                    name="organizacion">
+                                                                <input type="text" class="form-control visually-hidden"
+                                                                    id="idOrg" name="idOrg">
+                                                            </div>
+                                                            <div class="form-group">
+                                                                <label for="ClassPadre">Icono del Menu Padre</label>
+                                                                <input class="form-control" id="ClassPadre"
+                                                                    name="ClassPadre">
+                                                                <input type="text" class="form-control visually-hidden"
+                                                                    id="clsPadre" name="clsPadre">
+                                                            </div>
+                                                            <div class="form-group">
+                                                                <label for="MenuPadre">Menu padre</label>
+                                                                <input class="form-control" id="menuPadre"
+                                                                    name="menuPadre">
+                                                                <input type="text" class="form-control visually-hidden"
+                                                                    id="mp" name="mp">
+                                                            </div>
+                                                            <div class="form-group">
+                                                                <label for="nombre">Nombre del Menu</label>
+                                                                <input type="text" value="{{Nombre}}" name="nombre"
+                                                                    class="form-control" id="nombre"
+                                                                    placeholder="Escribe el Nombre del Menu">
+                                                            </div>
+                                                            <div class="form-group">
+                                                                <label for="Class">Icono del Menu</label>
+                                                                <input class="form-control" id="Class" name="Class">
+                                                                <input type="text" class="form-control visually-hidden"
+                                                                    id="cls" name="cls">
+                                                            </div>
+                                                            <div class="form-group">
+                                                                <label for="Segmento">Segmento</label>
+                                                                <input class="form-control" id="Segmento"
+                                                                    name="Segmento">
+                                                                <input type="text" class="form-control visually-hidden"
+                                                                    id="seg" name="seg">
+                                                            </div>
+                                                            <div class="form-group">
+                                                                <label for="moduloorg">Modulo</label>
+                                                                <input class="form-control" id="moduloorg"
+                                                                    name="moduloorg">
+                                                                <input type="text" class="form-control visually-hidden"
+                                                                    id="mod" name="mod">
+                                                            </div>
+                                                            <div class="modal-footer">
+                                                                <button id="crear" type="submit"
+                                                                    class="btn login-form__btn submit w-100">Crear
+                                                                </button>
+                                                                <button id="guardar" type="submit"
+                                                                    class="btn login-form__btn visually-hidden submit w-100">Guardar
+                                                                </button>
+                                                            </div>
+                                                        </form>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-striped table-bordered zero-configuration">
+                        <thead>
+                            <tr>
+                                <th>Organización</th>
+                                <th>Modulo</th>
+                                <th>Segmento</th>
+                                <th>Icono Menu Padre</th>
+                                <th>Menu Padre</th>
+                                <th>Nombre</th>
+                                <th>Icono</th>
+                                <th colspan="2">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {{#each menu}}
+                            <tr>
+                                <td>{{NombreOrg}}</td>
+                                <td>{{Modulo}}</td>
+                                <td>{{Segmento}}</td>
+                                <td><i class="{{ClassPadre}}"></i></td>
+                                <td>{{idMenuPadre}}</td>
+                                <td>{{Nombre}}</td>
+                                <td><i class="{{Class}}"></i></td>
+                                <td>
+                                    <button id="edit" data-url="/menu/{{_id}}" data-toggle="modal"
+                                        data-target=".add-user" type="submit" class="badge bg-success">
+                                        <i class="fa  fa-pencil m-r-5"></i>
+                                    </button>
+                                </td>
+                                <td>
+                                    <form action="/menu/{{_id}}" method="POST">
+                                        <input type="hidden" name="_method" value="DELETE">
+                                        <button type="submit" class="badge bg-danger">
+                                            <i class="fa fa-close"></i>
+                                        </button>
+                                    </form>
+                                </td>
+                            </tr>
+                            {{/each}}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
