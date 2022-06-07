@@ -9,8 +9,7 @@ let RedisStore = require("connect-redis")(sessions)
 const { createClient } = require("redis")
 let redisClient = createClient({ 
     host: 'ec2-3-226-70-204.compute-1.amazonaws.com',
-    port: '29720',
-    legacyMode: true })
+    port: '29720' })
 redisClient.connect().catch(console.error)
 
 module.exports = function (app) {
