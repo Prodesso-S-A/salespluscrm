@@ -4,10 +4,12 @@ const passport = require('passport')
 router.get('/', (req, res) => {
     req.session.destroy((err) => {
     })
+    console.log('here')
     res.render('./login', { title: 'login', layout: 'login' })
 })
 router.post('/login/signin', passport.authenticate('local', { failureRedirect: '/', failureFlash: true }), async function (req, res) {
-    var sessionArr = [{ id: '0', sesiones: 0 }]
+    var sessionArr = [{ 
+        id: '0', sesiones: 0 }]
     var ses = []
     await req.sessionStore.all((err, sessions) => {
         if (sessions != undefined) {

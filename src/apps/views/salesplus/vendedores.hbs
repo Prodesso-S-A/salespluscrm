@@ -1,0 +1,47 @@
+<style>
+    tr.rowHead {
+        cursor: pointer;
+    }
+</style>
+<div class="container-fluid mt-3">
+    <div class="card">
+        <div class="card-body">
+            <h4 class="card-title">Meta de Ventas</h4>
+            <div class="button-icon">
+                <ul class="nav nav-tabs mb-3" role="tablist">
+                    <li class="nav-item"><a class="nav-link active" data-toggle="tab" href="#tabla"><span><i
+                                    class="fa fa-table"></i></span></a>
+                    </li>
+                    <li class="nav-item"><a class="nav-link " data-toggle="tab" href="#ventas"><span><i
+                                    class="fa fa-line-chart"></i></span></a>
+                    </li>
+                </ul>
+                <!-- Tab panes -->
+                <div class="tab-content tabcontent-border">
+                    <div class="tab-pane fade show active" id="tabla" role="tabpanel">
+                        <div class="p-t-15">
+                            <div class="table-responsive">
+                                <table id="metaVentas" class="table table-bordered zero-configuration">
+                                    <thead>
+                                        <tr>
+                                            <th style="width: 1px;white-space: nowrap;"></th>
+                                            <th>Nombre</th>
+                                            <th>Puesto</th>
+                                            <th>Meta Mensual</th>
+                                            <th style="width: 1px;white-space: nowrap;"></th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="tab-pane fade " id="ventas" role="tabpanel">
+                        <canvas id="ventasChart" width="500" height="200"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

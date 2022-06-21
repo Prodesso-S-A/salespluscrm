@@ -7,6 +7,493 @@ router.post('/iconoJson', use(async (req, res) => {
     const icono = await AdminModels.IconoMenu.find().lean()
     res.send(icono)
 }))
+router.post('/userJson', use(async (req, res) => {
+    const user = await AdminModels.User.find().lean()
+    res.send(user)
+}))
+router.post('/vendedorJson', use(async (req, res) => {
+    const rol = await AdminModels.Rol.findOne({ nombre: "Vendedor" })
+    const user = await AdminModels.User.find({ Rol: rol._id }).lean()
+    res.send(user)
+}))
+router.get('/vendedorJson', use(async (req, res) => {
+    const ventas = await SPModels.OperacionCliente.aggregate([
+        {
+            $project: {
+                "idCliente": { "$toObjectId": "$idCliente" },
+                "montoFactura": 1,
+                "montoPagado": 1,
+            }
+        },
+        {
+            $lookup: {
+                "localField": "idCliente",
+                "from": "clientes",
+                "foreignField": "_id",
+                "pipeline": [{
+                    $project: {
+                        "idVendedor": "$idVendedor",
+                    }
+                }],
+                "as": "Cli"
+            }
+        },
+        {
+            $lookup: {
+                "localField": "Cli.idVendedor",
+                "from": "users",
+                "foreignField": "_id",
+                "pipeline": [{
+                    $project: {
+                        "nombreVendedor": "$nombre"
+                    }
+                }],
+                "as": "Vend"
+            }
+        },
+        {
+            $lookup: {
+                "localField": "Cli.idVendedor",
+                "from": "vendedors",
+                "foreignField": "_id",
+                "pipeline": [{
+                    $project: {
+                        "meta": "$meta"
+                    }
+                }],
+                "as": "metaVend"
+            }
+        },
+        {
+            $replaceRoot: { newRoot: { $mergeObjects: [{ $arrayElemAt: ["$Cli", 0] }, "$$ROOT"] } }
+        },
+        {
+            $replaceRoot: { newRoot: { $mergeObjects: [{ $arrayElemAt: ["$Vend", 0] }, "$$ROOT"] } }
+        },
+        {
+            $replaceRoot: { newRoot: { $mergeObjects: [{ $arrayElemAt: ["$metaVend", 0] }, "$$ROOT"] } }
+        },
+        {
+            $project: {
+                "Cli": 0
+            }
+        },
+        {
+            $project: {
+                "Vend": 0
+            }
+        },
+        {
+            $project: {
+                "metaVend": 0
+            }
+        }
+    ])
+    res.send(ventas)
+}))
+router.get('/vendedorChartJson', use(async (req, res) => {
+    const ventas = await SPModels.OperacionCliente.aggregate([
+        {
+            $project: {
+                "idCli": { "$toObjectId": "$idCliente" },
+                "montoFactura": 1,
+                "estadoFactura": 1,
+                "mesFactura":{ $dateToString: { format: "%m", date: "$fechaFactura" } },
+                "yearFactura":{ $dateToString: { format: "%Y", date: "$fechaFactura" } },
+                _id: 0
+            }
+        },
+        {
+            $lookup: {
+                "localField": "idCli",
+                "from": "clientes",
+                "foreignField": "_id",
+                "pipeline": [{
+                    $project: {
+                        "idVend": { "$toObjectId": "$idVendedor" },
+                        "idVendedor":1,
+                        _id: 0
+                    }
+                }],
+                "as": "Cli"
+            }
+        },
+        {
+            $lookup: {
+                "localField": "Cli.idVend",
+                "from": "users",
+                "foreignField": "_id",
+                "pipeline": [{
+                    $project: {
+                        "nombreVendedor": "$nombre",
+                        _id: 0
+                    }
+                }],
+                "as": "Vend"
+            }
+        },
+        {
+            $lookup: {
+                "localField": "Cli.idVendedor",
+                "from": "organigramas",
+                "foreignField": "idUser",
+                "pipeline": [{
+                    $project: {
+                        "meta": "$meta",
+                        _id: 0
+                    }
+                }],
+                "as": "metaVend"
+            }
+        },
+        {
+            $replaceRoot: { newRoot: { $mergeObjects: [{ $arrayElemAt: ["$Vend", 0] }, "$$ROOT"] } }
+        },
+        {
+            $replaceRoot: { newRoot: { $mergeObjects: [{ $arrayElemAt: ["$Cli", 0] }, "$$ROOT"] } }
+        },
+        {
+            $replaceRoot: { newRoot: { $mergeObjects: [{ $arrayElemAt: ["$metaVend", 0] }, "$$ROOT"] } }
+        },
+        {
+            $project: {
+                "metaVend": 0,
+                "Cli": 0,
+                "Vend": 0,
+                "idCli":0,
+                "idVend":0,
+                "idVendedor":0
+            }
+        }
+    ])
+    res.send(ventas)
+}))
+router.post('/vendedorChartJson', use(async (req, res) => {
+    const ventas = await SPModels.OperacionCliente.aggregate([
+        {
+            $project: {
+                "idCli": { "$toObjectId": "$idCliente" },
+                "montoFactura": 1,
+                "estadoFactura": 1,
+                "mesFactura":{ $dateToString: { format: "%m", date: "$fechaFactura" } },
+                "yearFactura":{ $dateToString: { format: "%Y", date: "$fechaFactura" } },
+                _id: 0
+            }
+        },
+        {
+            $lookup: {
+                "localField": "idCli",
+                "from": "clientes",
+                "foreignField": "_id",
+                "pipeline": [{
+                    $project: {
+                        "idVend": { "$toObjectId": "$idVendedor" },
+                        "nombreCliente":1,
+                        "idVendedor":1,
+                        _id: 0
+                    }
+                }],
+                "as": "Cli"
+            }
+        },
+        {
+            $lookup: {
+                "localField": "Cli.idVend",
+                "from": "users",
+                "foreignField": "_id",
+                "pipeline": [{
+                    $project: {
+                        "nombreVendedor": "$nombre",
+                        _id: 0
+                    }
+                }],
+                "as": "Vend"
+            }
+        },
+        {
+            $lookup: {
+                "localField": "Cli.idVendedor",
+                "from": "organigramas",
+                "foreignField": "idUser",
+                "pipeline": [{
+                    $project: {
+                        "meta": "$meta",
+                        _id: 0
+                    }
+                }],
+                "as": "metaVend"
+            }
+        },
+        {
+            $replaceRoot: { newRoot: { $mergeObjects: [{ $arrayElemAt: ["$Vend", 0] }, "$$ROOT"] } }
+        },
+        {
+            $replaceRoot: { newRoot: { $mergeObjects: [{ $arrayElemAt: ["$Cli", 0] }, "$$ROOT"] } }
+        },
+        {
+            $replaceRoot: { newRoot: { $mergeObjects: [{ $arrayElemAt: ["$metaVend", 0] }, "$$ROOT"] } }
+        },
+        {
+            $project: {
+                "metaVend": 0,
+                "Cli": 0,
+                "Vend": 0,
+                "idCli":0,
+                "idVend":0,
+                "idVendedor":0
+            }
+        }
+    ])
+    res.send(ventas)
+}))
+router.post('/organigramaJson', use(async (req, res) => {
+    const organigrama = await AdminModels.Organigrama.aggregate([
+        {
+            $project: {
+                "idOrganizacion": { "$toObjectId": "$idOrganizacion" },
+                "idJefe": { "$toObjectId": "$idJefe" },
+                "idUser": { "$toObjectId": "$idUser" },
+                "meta": 1
+            }
+        },
+        {
+            $lookup: {
+                "localField": "idOrganizacion",
+                "from": "organizacions",
+                "foreignField": "_id",
+                "pipeline": [{
+                    $project: {
+                        "NombreOrg": "$Nombre",
+                    }
+                }],
+                "as": "Org"
+            }
+        },
+        {
+            $lookup: {
+                "localField": "idUser",
+                "from": "users",
+                "foreignField": "_id",
+                "pipeline": [{
+                    $project: {
+                        "nombreUsuario": "$nombre",
+                        "idPuesto": { "$toObjectId": "$Rol" },
+                        "fotoUsuario": "$foto",
+                    }
+                }],
+                "as": "Usuarios"
+            }
+        },
+        {
+            $lookup: {
+                "localField": "Usuarios.idPuesto",
+                "from": "rols",
+                "foreignField": "_id",
+                "pipeline": [{
+                    $project: {
+                        "puesto": "$nombre"
+                    }
+                }],
+                "as": "puestos"
+            }
+        },
+        {
+            $lookup: {
+                "localField": "idJefe",
+                "from": "users",
+                "foreignField": "_id",
+                "pipeline": [{
+                    $project: {
+                        "nombreJefe": "$nombre",
+                        "idPuestoJefe": { "$toObjectId": "$Rol" },
+                        "fotoJefe": "$foto",
+                    }
+                }],
+                "as": "Jefes"
+            }
+        },
+        {
+            $lookup: {
+                "localField": "Jefes.idPuestoJefe",
+                "from": "rols",
+                "foreignField": "_id",
+                "pipeline": [{
+                    $project: {
+                        "puestoJefe": "$nombre"
+                    }
+                }],
+                "as": "puestoJefes"
+            }
+        },
+        {
+            $replaceRoot: { newRoot: { $mergeObjects: [{ $arrayElemAt: ["$Org", 0] }, "$$ROOT"] } }
+        },
+        {
+            $replaceRoot: { newRoot: { $mergeObjects: [{ $arrayElemAt: ["$Usuarios", 0] }, "$$ROOT"] } }
+        },
+        {
+            $replaceRoot: { newRoot: { $mergeObjects: [{ $arrayElemAt: ["$puestos", 0] }, "$$ROOT"] } }
+        },
+        {
+            $replaceRoot: { newRoot: { $mergeObjects: [{ $arrayElemAt: ["$Jefes", 0] }, "$$ROOT"] } }
+        },
+        {
+            $replaceRoot: { newRoot: { $mergeObjects: [{ $arrayElemAt: ["$puestoJefes", 0] }, "$$ROOT"] } }
+        },
+        {
+            $project: {
+                "Org": 0
+            }
+        },
+        {
+            $project: {
+                "Usuarios": 0
+            }
+        },
+        {
+            $project: {
+                "puestos": 0
+            }
+        },
+        {
+            $project: {
+                "Jefes": 0
+            }
+        }
+        ,
+        {
+            $project: {
+                "puestoJefes": 0
+            }
+        }
+
+    ])
+    res.send(organigrama)
+}))
+router.get('/organigramaJson', use(async (req, res) => {
+    const organigrama = await AdminModels.Organigrama.aggregate([
+        {
+            $project: {
+                "idOrganizacion": { "$toObjectId": "$idOrganizacion" },
+                "idJefe": { "$toObjectId": "$idJefe" },
+                "idUser": { "$toObjectId": "$idUser" },
+                "meta": 1
+            }
+        },
+        {
+            $lookup: {
+                "localField": "idOrganizacion",
+                "from": "organizacions",
+                "foreignField": "_id",
+                "pipeline": [{
+                    $project: {
+                        "NombreOrg": "$Nombre",
+                    }
+                }],
+                "as": "Org"
+            }
+        },
+        {
+            $lookup: {
+                "localField": "idUser",
+                "from": "users",
+                "foreignField": "_id",
+                "pipeline": [{
+                    $project: {
+                        "nombreUsuario": "$nombre",
+                        "idPuesto": { "$toObjectId": "$Rol" },
+                        "fotoUsuario": "$foto",
+                    }
+                }],
+                "as": "Usuarios"
+            }
+        },
+        {
+            $lookup: {
+                "localField": "Usuarios.idPuesto",
+                "from": "rols",
+                "foreignField": "_id",
+                "pipeline": [{
+                    $project: {
+                        "puesto": "$nombre"
+                    }
+                }],
+                "as": "puestos"
+            }
+        },
+        {
+            $lookup: {
+                "localField": "idJefe",
+                "from": "users",
+                "foreignField": "_id",
+                "pipeline": [{
+                    $project: {
+                        "nombreJefe": "$nombre",
+                        "idPuestoJefe": { "$toObjectId": "$Rol" },
+                        "fotoJefe": "$foto",
+                    }
+                }],
+                "as": "Jefes"
+            }
+        },
+        {
+            $lookup: {
+                "localField": "Jefes.idPuestoJefe",
+                "from": "rols",
+                "foreignField": "_id",
+                "pipeline": [{
+                    $project: {
+                        "puestoJefe": "$nombre"
+                    }
+                }],
+                "as": "puestoJefes"
+            }
+        },
+        {
+            $replaceRoot: { newRoot: { $mergeObjects: [{ $arrayElemAt: ["$Org", 0] }, "$$ROOT"] } }
+        },
+        {
+            $replaceRoot: { newRoot: { $mergeObjects: [{ $arrayElemAt: ["$Usuarios", 0] }, "$$ROOT"] } }
+        },
+        {
+            $replaceRoot: { newRoot: { $mergeObjects: [{ $arrayElemAt: ["$puestos", 0] }, "$$ROOT"] } }
+        },
+        {
+            $replaceRoot: { newRoot: { $mergeObjects: [{ $arrayElemAt: ["$Jefes", 0] }, "$$ROOT"] } }
+        },
+        {
+            $replaceRoot: { newRoot: { $mergeObjects: [{ $arrayElemAt: ["$puestoJefes", 0] }, "$$ROOT"] } }
+        },
+        {
+            $project: {
+                "Org": 0
+            }
+        },
+        {
+            $project: {
+                "Usuarios": 0
+            }
+        },
+        {
+            $project: {
+                "puestos": 0
+            }
+        },
+        {
+            $project: {
+                "Jefes": 0
+            }
+        }
+        ,
+        {
+            $project: {
+                "puestoJefes": 0
+            }
+        }
+
+    ])
+    res.send(organigrama)
+}))
 router.post('/urlJson', use(async (req, res) => {
     const url = await AdminModels.Url.find({ Asignada: false }).lean()
     res.send(url)
@@ -248,7 +735,7 @@ router.get('/permisosJson', use(async (req, res) => {
     for (let f of rol.Permisos) {
         idMod.push(f.idModulo)
     }
-    var segmentos = await AdminModels.Menu.distinct("Segmento", { 'idModulo': { $in: idMod }, idOrganizacion: userModel[0].idOrg  }).lean()
+    var segmentos = await AdminModels.Menu.distinct("Segmento", { 'idModulo': { $in: idMod }, idOrganizacion: userModel[0].idOrg }).lean()
     for (let seg of segmentos) {
         var menuPadre = await AdminModels.Menu.distinct("idMenuPadre", { 'idModulo': { $in: idMod }, 'Segmento': { $in: seg }, idOrganizacion: userModel[0].idOrg }).lean()
         for (let mp of menuPadre) {
@@ -268,11 +755,11 @@ router.get('/permisosJson', use(async (req, res) => {
                 men.push({ NombreMenu: menu.Nombre, icono: menu.Class, Permiso: permarr, Url: mod.Url })
             }
             lig.push({ "NombreMenuPadre": mp, "Menu": men[0] })
-           
+
         }
-        ligSeg.push({"Segmento":seg,"MenuPadre":lig})
+        ligSeg.push({ "Segmento": seg, "MenuPadre": lig })
     }
-    usrMenu.push({"Ligas":ligSeg}) 
+    usrMenu.push({ "Ligas": ligSeg })
     console.log(usrMenu)
     usr['userMenu'] = usrMenu
 
@@ -385,12 +872,12 @@ router.post('/clienteJson', use(async (req, res) => {
     res.send(cliente)
 }))
 router.post('/tagJson', use(async (req, res) => {
-    const tag = await SPModels.Tag.find({ idOrganizacion:  req.user.idOrg  }).lean()
+    const tag = await SPModels.Tag.find({ idOrganizacion: req.user.idOrg }).lean()
     res.send(tag)
 }))
 router.post('/clienteUpdate', use(async (req, res) => {
-    const { tag,cliente } = req.body
-    await SPModels.Cliente.findOneAndUpdate({ _id: cliente },{ tag:tag, idOrganizacion: req.user.idOrg, usuarioCreador: req.user._id });
+    const { tag, cliente } = req.body
+    await SPModels.Cliente.findOneAndUpdate({ _id: cliente }, { tag: tag, idOrganizacion: req.user.idOrg, usuarioCreador: req.user._id });
     req.flash('success_msg', 'Cliente modificado')
     res.redirect('/cliente')
 }))

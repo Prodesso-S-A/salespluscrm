@@ -1,0 +1,100 @@
+<div class="container-fluid mt-3">
+    <div class="card">
+        <div class="card-body">
+            <h4 class="card-title">Organigrama</h4>
+            <div class="button-icon">
+                <button type="button" class="btn mb-1 btn-primary" data-toggle="modal"
+                    data-target=".add-user">Agregar<span class="btn-icon-right"><i class="icon-plus"></i></span>
+                </button>
+                <div class="modal fade add-user" tabindex="-1" role="dialog" aria-hidden="true">
+                    <div class="modal-dialog modal-lg">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title">Añadir Organigrama</h5>
+                                <button type="button" class="close" data-dismiss="modal"><span>&times;</span>
+                                </button>
+                            </div>
+                            <div class="login-form-bg h-100">
+                                <div class="container h-100">
+                                    <div class="row justify-content-center h-100">
+                                        <div class="col-xl-12">
+                                            <div class="form-input-content">
+                                                <div class="card login-form mb-0">
+                                                    <div class="card-body pt-5">
+                                                        <form id="submit" class="row g-3 needs-validation"
+                                                            action="/organigrama" method="POST">
+                                                            <div class="form-group">
+                                                                <label for="usuario">Usuario</label>
+                                                                <input type="text" value="{{usuario}}" name="usuario"
+                                                                    class="form-control" id="usuario"
+                                                                    placeholder="Escribe la clase del icono">
+                                                            </div>
+                                                            <div class="form-group">
+                                                                <label for="Jefe">Jefe</label>
+                                                                <input type="text" value="{{usuario}}" name="Jefe"
+                                                                    class="form-control" id="Jefe"
+                                                                    placeholder="Escribe la clase del icono">
+                                                            </div>
+                                                            <div class="modal-footer">
+                                                                <button type="submit"
+                                                                    class="btn login-form__btn submit w-100">Crear
+                                                                    Icono</button>
+                                                            </div>
+                                                        </form>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+                <ul class="nav nav-tabs mb-3" role="tablist">
+                    <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#tabla"><span><i
+                                    class="fa fa-table"></i></span></a>
+                    </li>
+                    <li class="nav-item"><a class="nav-link active" data-toggle="tab" href="#orgchart"><span><i
+                                    class="fa fa-sitemap"></i></span></a>
+                    </li>
+                </ul>
+                <!-- Tab panes -->
+                <div class="tab-content tabcontent-border">
+                    <div class="tab-pane fade " id="tabla" role="tabpanel">
+                        <div class="p-t-15">
+                            <div class="table-responsive">
+                                <table class="table table-striped table-bordered zero-configuration">
+                                    <thead>
+                                        <tr>
+                                            <th>Nombre</th>
+                                            <th>Puesto</th>
+                                            <th>Jefe</th>
+                                            <th>Puesto Jefe</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {{#each organigrama}}
+                                        <tr>
+                                            <td>{{nombreUsuario}}</td>
+                                            <td>{{puesto}}</td>
+                                            <td>{{nombreJefe}}</td>
+                                            <td>{{puestoJefe}}</td>
+                                        </tr>
+                                        {{/each}}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="tab-pane fade show active" id="orgchart" role="tabpanel">
+
+                        <div id="chart-container"></div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>

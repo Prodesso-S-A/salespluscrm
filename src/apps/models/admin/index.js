@@ -8,5 +8,6 @@ module.exports = {
     Permiso: require('./Permiso'),
     Rol: require('./Rol'),
     Url: require('./Url'),
-    User: require('./User')
+    User: require('./User'),
+    Organigrama: require('./Organigrama')
   }

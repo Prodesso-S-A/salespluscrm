@@ -6,6 +6,7 @@ const clienteSchema = new mongoose.Schema({
     nombreCliente:{type:String, required:true},
     rfcCliente:{type:String, required:true},
     tag:{type:String,default:"6296a7dad486268769fb859f"},
+    idVendedor:{type:String, required:true},
     nombreContacto:{type:String, required:true},
     puestoContacto:{type:String, required:true},
     celularContacto:{type:String, required:true},

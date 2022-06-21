@@ -30,12 +30,268 @@
     <link href="assets/plugins/clockpicker/dist/jquery-clockpicker.min.css" rel="stylesheet">
     <!-- Color picker plugins css -->
     <link href="assets/plugins/jquery-asColorPicker-master/css/asColorPicker.css" rel="stylesheet">
+
     <link href="assets/css/style.css" rel="stylesheet">
     <link href="assets/css/custom.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://dabeng.github.io/OrgChart/css/jquery.orgchart.css">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://kit.fontawesome.com/8515a8bc68.js" crossorigin="anonymous"></script>
     <script src="https://code.jquery.com/jquery-2.2.4.js"
         integrity="sha256-iT6Q9iMJYuQiMWNd9lDyBUStIq/8PuOW33aOqmvFpqI=" crossorigin="anonymous"></script>
+    <style>
+        #chart-container {
+            font-family: Arial;
+            height: 420px;
+            border: 1px solid #aaa;
+            overflow: auto;
+            text-align: center;
+        }
+
+        .orgchart .second-menu-icon {
+            transition: opacity .5s;
+            opacity: 0;
+            right: -5px;
+            top: -5px;
+            z-index: 2;
+            font-size: 18px;
+            position: absolute;
+        }
+
+        .orgchart .second-menu-icon::before {
+            background-color: rgba(217, 83, 79, .8);
+        }
+
+        .orgchart .second-menu-icon:hover {
+            color: #D9534F;
+        }
+
+        .orgchart .node:hover .second-menu-icon {
+            opacity: 1;
+        }
+
+        .orgchart .node .second-menu {
+            display: none;
+            position: absolute;
+            top: 0;
+            right: -70px;
+            border-radius: 35px;
+            box-shadow: 0 0 4px 1px #999;
+            background-color: #fff;
+            z-index: 1;
+        }
+
+        .orgchart .node .second-menu .avatar {
+            width: 60px;
+            height: 60px;
+            border-radius: 30px;
+            float: left;
+            margin: 5px;
+        }
+
+        #github-link {
+            display: inline-block;
+            background-image: url("https://dabeng.github.io/OrgChart/img/logo.png");
+            background-size: cover;
+            width: 64px;
+            height: 64px;
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
+
+        .circle {
+            border-radius: 50%;
+            height: 40px;
+            width: 40px;
+            overflow: hidden;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .timeline {
+            list-style: none;
+            padding: 20px 0 20px;
+            position: relative;
+        }
+
+        .timeline:before {
+            top: 0;
+            bottom: 0;
+            position: absolute;
+            content: " ";
+            width: 3px;
+            background-color: #eeeeee;
+            left: 50%;
+            margin-left: -1.5px;
+        }
+
+        .timeline>li {
+            margin-bottom: 20px;
+            position: relative;
+        }
+
+        .timeline>li:before,
+        .timeline>li:after {
+            content: " ";
+            display: table;
+        }
+
+        .timeline>li:after {
+            clear: both;
+        }
+
+        .timeline>li:before,
+        .timeline>li:after {
+            content: " ";
+            display: table;
+        }
+
+        .timeline>li:after {
+            clear: both;
+        }
+
+        .timeline>li>.timeline-panel {
+            width: 46%;
+            float: left;
+            border: 1px solid #d4d4d4;
+            border-radius: 2px;
+            padding: 20px;
+            position: relative;
+            -webkit-box-shadow: 0 1px 6px rgba(0, 0, 0, 0.175);
+            box-shadow: 0 1px 6px rgba(0, 0, 0, 0.175);
+        }
+
+        .timeline>li>.timeline-panel:before {
+            position: absolute;
+            top: 26px;
+            right: -15px;
+            display: inline-block;
+            border-top: 15px solid transparent;
+            border-left: 15px solid #ccc;
+            border-right: 0 solid #ccc;
+            border-bottom: 15px solid transparent;
+            content: " ";
+        }
+
+        .timeline>li>.timeline-panel:after {
+            position: absolute;
+            top: 27px;
+            right: -14px;
+            display: inline-block;
+            border-top: 14px solid transparent;
+            border-left: 14px solid #fff;
+            border-right: 0 solid #fff;
+            border-bottom: 14px solid transparent;
+            content: " ";
+        }
+
+        .timeline>li>.timeline-badge {
+            color: #fff;
+            width: 50px;
+            height: 50px;
+            line-height: 50px;
+            font-size: 1.4em;
+            text-align: center;
+            position: absolute;
+            top: 16px;
+            left: 50%;
+            margin-left: -25px;
+            background-color: #999999;
+            z-index: 100;
+            border-top-right-radius: 50%;
+            border-top-left-radius: 50%;
+            border-bottom-right-radius: 50%;
+            border-bottom-left-radius: 50%;
+        }
+
+        .timeline>li.timeline-inverted>.timeline-panel {
+            float: right;
+        }
+
+        .timeline>li.timeline-inverted>.timeline-panel:before {
+            border-left-width: 0;
+            border-right-width: 15px;
+            left: -15px;
+            right: auto;
+        }
+
+        .timeline>li.timeline-inverted>.timeline-panel:after {
+            border-left-width: 0;
+            border-right-width: 14px;
+            left: -14px;
+            right: auto;
+        }
+
+        .timeline-badge.primary {
+            background-color: #2e6da4 !important;
+        }
+
+        .timeline-badge.success {
+            background-color: #3f903f !important;
+        }
+
+        .timeline-badge.warning {
+            background-color: #f0ad4e !important;
+        }
+
+        .timeline-badge.danger {
+            background-color: #d9534f !important;
+        }
+
+        .timeline-badge.info {
+            background-color: #5bc0de !important;
+        }
+
+        .timeline-title {
+            margin-top: 0;
+            color: inherit;
+        }
+
+        .timeline-body>p,
+        .timeline-body>ul {
+            margin-bottom: 0;
+        }
+
+        .timeline-body>p+p {
+            margin-top: 5px;
+        }
+
+        @media (max-width: 767px) {
+            ul.timeline:before {
+                left: 40px;
+            }
+
+            ul.timeline>li>.timeline-panel {
+                width: calc(100% - 90px);
+                width: -moz-calc(100% - 90px);
+                width: -webkit-calc(100% - 90px);
+            }
+
+            ul.timeline>li>.timeline-badge {
+                left: 15px;
+                margin-left: 0;
+                top: 16px;
+            }
+
+            ul.timeline>li>.timeline-panel {
+                float: right;
+            }
+
+            ul.timeline>li>.timeline-panel:before {
+                border-left-width: 0;
+                border-right-width: 15px;
+                left: -15px;
+                right: auto;
+            }
+
+            ul.timeline>li>.timeline-panel:after {
+                border-left-width: 0;
+                border-right-width: 14px;
+                left: -14px;
+                right: auto;
+            }
+        }
+    </style>
 
 </head>
 
@@ -141,8 +397,11 @@
     <script src="assets/plugins/chartist-plugin-tooltips/js/chartist-plugin-tooltip.min.js"></script>
     <script src="assets/js/dashboard/dashboard-1.js"></script>
     <script src="assets/js/plugins-init/form-pickers-init.js"></script>
-
+    <script src="https://dabeng.github.io/OrgChart/js/jquery.orgchart.js"></script>
+    <script src="https://dabeng.github.io/OrgChart/js/jquery.mockjax.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/lodash@4.17.20/lodash.min.js"></script>
     <script src="toolsset.js"></script>
+
 </body>
 
 </html>

@@ -21,6 +21,138 @@ function getOPeraciones(idCliente) {
     $("#OperacionForm").addClass("visually-hidden");
     $("#addRowOP").prop('disabled', false);
 }
+function vendChart() {
+    if ($('#ventasChart').length) {
+        const ctx = $('#ventasChart');
+        ctx.height = 150;
+        let meses = ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"]
+        let groupedObjects = new Array();
+        $.getJSON("/vendedorChartJson", function (ventas) {
+            var vend = new Array();
+            var estado = new Array();
+            var mes = new Array();
+            var year = new Array();
+            var j = 0;
+            var a = 0;
+            var b = 0;
+            var c = 0;
+            _.each(ventas, function (obj) {
+                var existingObj;
+                if ($.inArray(obj.nombreVendedor, vend) >= 0) {
+                    if ($.inArray(obj.estadoFactura, estado) >= 0) {
+                        if ($.inArray(obj.mesFactura, mes) >= 0) {
+                            if ($.inArray(obj.yearFactura, year) >= 0) {
+                                existingObj = _.find(ventas, { 'nombreVendedor': obj.nombreVendedor, 'estadoFactura': obj.estadoFactura, 'mesFactura': obj.mesFactura, 'yearFactura': obj.yearFactura });
+                                existingObj.montoFactura += obj.montoFactura;
+                            } else {
+                                groupedObjects = groupedObjects.concat(obj)
+                                year[c] = obj.yearFactura;
+                                c++;
+                            }
+                        } else {
+                            groupedObjects = groupedObjects.concat(obj)
+                            mes[j] = obj.mesFactura;
+                            year[c] = obj.yearFactura;
+                            c++;
+                            j++;
+                        }
+                    } else {
+                        groupedObjects = groupedObjects.concat(obj)
+                        estado[a] = obj.estadoFactura;
+                        mes[j] = obj.mesFactura;
+                        year[c] = obj.yearFactura;
+                        a++;
+                        c++;
+                        j++;
+                    }
+                } else {
+                    groupedObjects = groupedObjects.concat(obj)
+                    vend[b] = obj.nombreVendedor;
+                    estado[a] = obj.estadoFactura;
+                    mes[j] = obj.mesFactura;
+                    year[c] = obj.yearFactura;
+                    b++;
+                    a++;
+                    c++;
+                    j++;
+                }
+            });
+        }).done(function () {
+            let dtset = new Array();
+            let dtv = new Array();
+            let pagadas = new Array();
+            let porpagar = new Array();
+            let k = 0
+            var mesMt = new Array();
+            for (var i = 0; i < 12; i++) {
+                mesMt[i] = 0
+                pagadas[i] = 0
+                porpagar[i] = 0
+            }
+            console.log(groupedObjects)
+            _.each(groupedObjects, function (obj) {
+                if ($.inArray(obj.nombreVendedor, dtv) >= 0) {
+                } else {
+                    dtv[k] = obj.nombreVendedor;
+                    k++;
+                }
+            })
+            for (var a in dtv) {
+                if (dtv.hasOwnProperty(a)) {
+                    var obj = $.grep(groupedObjects, function (e) { return e.nombreVendedor == dtv[a]; });
+                    for (var itm in obj) {
+                        if (obj[itm].estadoFactura === "Pagada") {
+                            pagadas[parseInt(obj[itm].mesFactura) - 1] = obj[itm].montoFactura
+                        } else {
+                            porpagar[parseInt(obj[itm].mesFactura) - 1] = obj[itm].montoFactura
+                        }
+                    }
+                    for (var i = 0; i < 12; i++) {
+                        mesMt[i] = obj[0].meta
+                    }
+                    var rndBar = ["#a862ea", "#4e55a4", "#6f7aea", "#de62ea", "#6545a4", "#9062ea", "#6b45a4", "#bf62ea", "#6383ea", "#465ca4", "#9862ea"]
+                    var rndLin = ["#0000ff", "#002db3", "#5500ff", "#00ffff", "#00b3b3", "#0040ff", "#002db3", "#bfcfff", "#809fff", "#809fff", "#0080fe"]
+                    let random = Math.floor(Math.random() * rndBar.length);
+                    dtset.push({ label: "Pagadas " + dtv[a], stack: dtv[a], data: pagadas, backgroundColor: rndBar[random] })
+                    random = Math.floor(Math.random() * rndBar.length);
+                    dtset.push({ label: "Por Pagar " + dtv[a], stack: dtv[a], data: porpagar, backgroundColor: rndBar[random] })
+                    random = Math.floor(Math.random() * rndLin.length);
+                    dtset.push({ label: "Meta " + dtv[a], data: mesMt, borderWidth: "0", type: "line", backgroundColor: rndLin[random], fill: false })
+                    mesMt = []
+                    pagadas = []
+                    porpagar = []
+                    for (var i = 0; i < 12; i++) {
+                        mesMt[i] = 0
+                        pagadas[i] = 0
+                        porpagar[i] = 0
+                    }
+                }
+            }
+            var myChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: meses,
+                    datasets: dtset
+                },
+                options: {
+                    responsive: true,
+                    interaction: {
+                        intersect: false,
+                    },
+                    scales: {
+                        x: {
+                            stacked: true,
+                        },
+                        y: {
+                            stacked: true
+                        }
+                    }
+                }
+            });
+        })
+    }
+
+}
 function getComments(idCliente) {
     let url = "/comentarios/" + idCliente
     var classli = ""
@@ -82,9 +214,130 @@ function deleteCom(e) {
         getComments(idCliente)
     })
 }
+function fillOrgChart() {
+    let urlUPDATE = "/organigramaJson";
+    if ($('#chart-container').length) {
+        $.getJSON(urlUPDATE, function (data) {
+            let DirArr = []
+            let Gtearr = []
+            let Jfarr = []
+            let vendArr = []
+            const Gtes = data.filter(user => user.puestoJefe === 'Director');
+            Gtearr = []
+            $.each(Gtes, function (key, val) {
+                const Jefe = data.filter(user => user.idJefe === val.idUser);
+                Jfarr = []
+                $.each(Jefe, function (key, val) {
+                    const Vend = data.filter(user => user.idJefe === val.idUser);
+                    vendArr = []
+                    $.each(Vend, function (key, val) {
+                        vendArr.push({ 'name': val.nombreUsuario, 'title': val.puesto, 'foto': val.fotoUsuario, 'className': 'title' })
+                    })
+                    Jfarr.push({ 'name': val.nombreUsuario, 'title': val.puesto, 'foto': val.fotoUsuario, 'className': 'title', 'children': vendArr })
+                })
+                Gtearr.push({ 'name': val.nombreUsuario, 'title': val.puesto, 'foto': val.fotoUsuario, 'className': 'title', 'children': Jfarr })
+            })
+            DirArr.push({ 'name': Gtes[0].nombreJefe, 'foto': Gtes[0].fotoJefe, 'title': Gtes[0].puestoJefe, 'className': 'title', 'children': Gtearr })
+            console.log(DirArr[0])
+            $('#chart-container').orgchart({
+                'data': DirArr[0],
+                'nodeContent': 'title',
+                'nodeID': 'id',
+                'createNode': function ($node, data) {
+                    var secondMenuIcon = $('<i>', {
+                        'class': 'oci oci-info-circle second-menu-icon',
+                        click: function () {
+                            $(this).siblings('.second-menu').toggle();
+                        }
+                    });
+                    var secondMenu = '<div class="second-menu"><img class="avatar" src="' + data.fotoUsuario + '"></div>';
+                    $node.append(secondMenuIcon).append(secondMenu);
+                }
+            });
+        })
+    }
+}
+function fillVentas() {
+    $("#metaVentas > tbody").empty()
+    let urlUPDATE = "/organigramaJson";
+    if ($('#metaVentas').length) {
+        $.getJSON(urlUPDATE, function (data) {
+            let DirArr = ""
+            let Gtearr = ""
+            let Jfarr = ""
+            let vendArr = ""
+            let monto = ""
+            let montoJ = 0
+            let montoG = 0
+            let montoD = 0
+            const Gtes = data.filter(user => user.puestoJefe === 'Director');
+            Gtearr = ""
+            $.each(Gtes, function (key, val) {
+                const Jefe = data.filter(user => user.idJefe === val.idUser);
+                Jfarr = ""
+                $.each(Jefe, function (key, val) {
+                    const Vend = data.filter(user => user.idJefe === val.idUser);
+                    vendArr = ""
+                    $.each(Vend, function (key, val) {
+                        if (val.meta != "0") {
+                            monto = '$' + parseFloat(val.meta, 10).toFixed(2).replace(/(\d)(?=(\d{3})+\.)/g, "$1,").toString()
+                            montoJ = parseFloat(montoJ) + parseFloat(val.meta)
+                            vendArr = vendArr + '<tr><td></td><td>' + val.nombreUsuario + '</td><td>' + val.puesto + '</td><td>' + monto + '</td><td><button  type="submit" onclick="editMeta(this)" class="badge bg-info" data-url="/saveMeta/' + val.idUser + '" data-target=".paymentMark"><i class="fa fa-pencil m-r-5"></i></button></td></tr>'
+                        } else {
+                            vendArr = vendArr + '<tr><td></td><td>' + val.nombreUsuario + '</td><td>' + val.puesto + '</td><td><input type="number" id="in' + val.idUser + '"></td><td><button  type="submit" onclick="saveMeta(this)" class="badge bg-success" data-url="/saveMeta/' + val.idUser + '" data-target=".paymentMark"><i class="fa fa-save m-r-5"></i></button></td></tr>'
+                        }
+                    })
+                    monto = '$' + parseFloat(montoJ, 10).toFixed(2).replace(/(\d)(?=(\d{3})+\.)/g, "$1,").toString()
+                    montoG = montoG + montoJ
+                    Jfarr = Jfarr + '<tr data-id="r' + val.idUser + '" onclick="toggle(this)"><td><button type="submit"  class="btn mb-1 btn-rounded btn-outline-success btn-xs"><i class="fa fa-plus m-r-5"></i></button></td><td>' + val.nombreUsuario + '</td><td>' + val.puesto + '</td><td>' + monto + '</td><td></td></tr><tr><td colspan=5><div class="table-responsive rowV" id="r' + val.idUser + '"><table class="table-light">' + vendArr + '</table></div></td></tr>'
+                    montoJ = 0
+                })
+                monto = '$' + parseFloat(montoG, 10).toFixed(2).replace(/(\d)(?=(\d{3})+\.)/g, "$1,").toString()
+                montoD = montoD + montoG
+                Gtearr = Gtearr + '<tr data-id="r' + val.idUser + '" onclick="toggle(this)"><td><button type="submit"  class="btn mb-1 btn-rounded btn-outline-success btn-xs"><i class="fa fa-plus m-r-5"></i></button></td><td>' + val.nombreUsuario + '</td><td>' + val.puesto + '</td><td>' + monto + '</td><td></td></tr><tr><td colspan=5><div class="table-responsive rowJ" id="r' + val.idUser + '"><table class="table-light">' + Jfarr + '</table></div></td></tr>'
+                montoG = 0
+            })
+            monto = '$' + parseFloat(montoD, 10).toFixed(2).replace(/(\d)(?=(\d{3})+\.)/g, "$1,").toString()
+            DirArr = DirArr + '<tr data-id="r' + Gtes[0].idJefe + '" onclick="toggle(this)" ><td><button type="submit" class="btn mb-1 btn-rounded btn-outline-success btn-xs"><i class="fa fa-plus m-r-5"></i></button></td><td>' + Gtes[0].nombreJefe + '</td><td>' + Gtes[0].puestoJefe + '</td><td>' + monto + '</td><td></td></tr><tr><td colspan=5><div class="table-responsive rowG" id="r' + Gtes[0].idJefe + '"><table class="table-light">' + Gtearr + '</table></div></td></tr>'
+            $("#metaVentas > tbody").append(DirArr)
+            $(".rowV").slideToggle()
+            $(".rowJ").slideToggle()
+            $(".rowG").slideToggle()
+
+        })
+    }
+
+
+}
+function toggle(e) {
+    let id = $(e).attr("data-id");
+    //getting the next element
+    //open up the content needed - toggle the slide- if visible, slide up, if not slidedown.
+    console.log(id)
+    $("#" + id).slideToggle()
+    $(e).closest('tr').find('i').toggleClass('fa-plus fa-minus')
+    $(e).closest('tr').find('button').toggleClass('btn-outline-success btn-outline-danger')
+}
+function saveMeta(e) {
+    let urlUPDATE = e.getAttribute("data-url");
+    let id = e.getAttribute("data-url").replace('/saveMeta/', '')
+    $.post(urlUPDATE, { meta: $("#in" + id).val() }).then(function () {
+        fillVentas()
+    });
+}
+function editMeta(e) {
+    let urlUPDATE = e.getAttribute("data-url");
+    $.post(urlUPDATE, { meta: "0" }).then(function () {
+        fillVentas()
+    });
+}
 
 $(document).ready(function () {
     var quantitiy = 0;
+    let u = document.URL;
+    fillOrgChart()
+    fillVentas()
+    vendChart()
     $("table").each(function () {
         var curTable = $(this);
         $(curTable).find('tr').each(function () {
@@ -158,6 +411,7 @@ $(document).ready(function () {
         })
 
     });
+
     $(".needs-validation").validate(
         {
             errorClass: "invalid-feedback animated fadeInDown",
@@ -237,6 +491,42 @@ $(document).ready(function () {
         displayField: 'iconoClass',
         renderer: function (data) {
             return '<icon class="' + data.iconoClass + '"/> ' + data.iconoClass
+        }
+    });
+    var usr = $('#usuario').magicSuggest({
+        allowFreeEntries: false,
+        data: '/userJson',
+        name: 'nombre',
+        maxSelection: 1,
+        resultsField: 'nombre',
+        valueField: '_id',
+        displayField: 'nombre',
+        renderer: function (data) {
+            return data.nombre
+        }
+    });
+    var vend = $('#vendedor').magicSuggest({
+        allowFreeEntries: false,
+        data: '/vendedorJson',
+        name: 'nombre',
+        maxSelection: 1,
+        resultsField: 'nombre',
+        valueField: '_id',
+        displayField: 'nombre',
+        renderer: function (data) {
+            return data.nombre
+        }
+    });
+    var cls = $('#Jefe').magicSuggest({
+        allowFreeEntries: false,
+        data: '/userJson',
+        name: 'nombre',
+        maxSelection: 1,
+        resultsField: 'nombre',
+        valueField: '_id',
+        displayField: 'nombre',
+        renderer: function (data) {
+            return data.nombre
         }
     });
     var clsP = $('#ClassPadre').magicSuggest({
@@ -503,6 +793,14 @@ $(document).ready(function () {
                     tag.setValue([data.tag]);
                 });
             }
+            if ($(vend).length) {
+                $.post("/vendedorJson", function (ven) {
+                    vend.setData(ven)
+                }).then(function () {
+
+                    vend.setValue([data.idVendedor]);
+                });
+            }
             if ($(org).length) {
                 if (data.idOrg) {
                     org.setValue([data.idOrg]);
@@ -562,7 +860,8 @@ $(document).ready(function () {
             $("label[for='password']").addClass("visually-hidden ");
             $("label[for='myFile']").addClass("visually-hidden ");
             $("label[for='inputGroupFile01']").addClass("visually-hidden ");
-
+            $("#profile-tab").removeClass("visually-hidden ");
+            $("#contact-tab").removeClass("visually-hidden ");
             $("#myFile").rules('remove', 'required');
             $("label[for='confirm_password']").addClass("visually-hidden ");
             //set form action

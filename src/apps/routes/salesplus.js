@@ -1,5 +1,6 @@
 const router = require('express').Router();
 const SPModels = require('../models').salesplus
+const AdminModel = require('../models').admin
 const uuid = require('uuid');
 const use = require('../config/error')
 const File = require("../models/global").File;
@@ -31,6 +32,155 @@ router.get('/cliente', use(async (req, res) => {
     const data = await SPModels.Cliente.find({ idOrganizacion: req.user.idOrg }).lean()
     res.render('./salesplus/clientes', { data })
 }))
+router.get('/metaVentas', use(async (req, res) => {
+    res.render('./salesplus/vendedores')
+}))
+router.post('/saveMeta/:id', use(async (req, res) => {
+    const { meta } = req.body
+    const id = req.params.id
+    await AdminModel.Organigrama.findOneAndUpdate({ idUser: id }, { meta },
+        async function (err, doc, numbersAffected) {
+            const newInsertMsg = new SPModels.ComentarioCliente({ idCliente: id, tipoComentario: "MetaUpdate", comentario: "Operación Marcada como Pagada Por : " + req.user.User + "(" + req.user.NombreRol + ")", idOrganizacion: req.user.idOrg, usuarioCreador: req.user._id })
+            await newInsertMsg.save()
+        })
+    res.send("Realizado")
+}))
+router.get('/organigrama', use(async (req, res) => {
+    const organigrama = await AdminModel.Organigrama.aggregate([
+        {
+            $project: {
+                "idOrganizacion": { "$toObjectId": "$idOrganizacion" },
+                "idJefe": { "$toObjectId": "$idJefe" },
+                "idUser": { "$toObjectId": "$idUser" }
+            }
+        },
+        {
+            $lookup: {
+                "localField": "idOrganizacion",
+                "from": "organizacions",
+                "foreignField": "_id",
+                "pipeline": [{
+                    $project: {
+                        "NombreOrg": "$Nombre",
+                    }
+                }],
+                "as": "Org"
+            }
+        },
+        {
+            $lookup: {
+                "localField": "idUser",
+                "from": "users",
+                "foreignField": "_id",
+                "pipeline": [{
+                    $project: {
+                        "nombreUsuario": "$nombre",
+                        "idPuesto": { "$toObjectId": "$Rol" },
+                    }
+                }],
+                "as": "Usuarios"
+            }
+        },
+        {
+            $lookup: {
+                "localField": "Usuarios.idPuesto",
+                "from": "rols",
+                "foreignField": "_id",
+                "pipeline": [{
+                    $project: {
+                        "puesto": "$nombre"
+                    }
+                }],
+                "as": "puestos"
+            }
+        },
+        {
+            $lookup: {
+                "localField": "idJefe",
+                "from": "users",
+                "foreignField": "_id",
+                "pipeline": [{
+                    $project: {
+                        "nombreJefe": "$nombre",
+                        "idPuestoJefe": { "$toObjectId": "$Rol" },
+
+                    }
+                }],
+                "as": "Jefes"
+            }
+        },
+        {
+            $lookup: {
+                "localField": "Jefes.idPuestoJefe",
+                "from": "rols",
+                "foreignField": "_id",
+                "pipeline": [{
+                    $project: {
+                        "puestoJefe": "$nombre"
+                    }
+                }],
+                "as": "puestoJefes"
+            }
+        },
+        {
+            $replaceRoot: { newRoot: { $mergeObjects: [{ $arrayElemAt: ["$Org", 0] }, "$$ROOT"] } }
+        },
+        {
+            $replaceRoot: { newRoot: { $mergeObjects: [{ $arrayElemAt: ["$Usuarios", 0] }, "$$ROOT"] } }
+        },
+        {
+            $replaceRoot: { newRoot: { $mergeObjects: [{ $arrayElemAt: ["$puestos", 0] }, "$$ROOT"] } }
+        },
+        {
+            $replaceRoot: { newRoot: { $mergeObjects: [{ $arrayElemAt: ["$Jefes", 0] }, "$$ROOT"] } }
+        },
+        {
+            $replaceRoot: { newRoot: { $mergeObjects: [{ $arrayElemAt: ["$puestoJefes", 0] }, "$$ROOT"] } }
+        },
+        {
+            $project: {
+                "Org": 0
+            }
+        },
+        {
+            $project: {
+                "Usuarios": 0
+            }
+        },
+        {
+            $project: {
+                "puestos": 0
+            }
+        },
+        {
+            $project: {
+                "Jefes": 0
+            }
+        }
+        ,
+        {
+            $project: {
+                "puestoJefes": 0
+            }
+        }
+
+    ])
+    console.log(organigrama)
+    res.render('./salesplus/organigrama', { organigrama })
+}))
+router.post('/organigrama', use(async (req, res) => {
+    const { usuario, Jefe } = req.body
+    const dataInsert = await AdminModel.Organigrama.findOne({ idUser: usuario[0] }).lean()
+    if (dataInsert) {
+        req.flash('error_msg', 'Usuario ya existe en el Organigrama')
+        res.redirect('/organigrama')
+    } else {
+        const newInsert = new AdminModel.Organigrama({ idUser: usuario[0], idJefe: Jefe[0], idOrganizacion: req.user.idOrg, usuarioCreador: req.user._id })
+        await newInsert.save();
+        req.flash('success_msg', 'Organigrama agregado')
+        res.redirect('/organigrama')
+    }
+}))
 //GET UNIQUE
 router.get('/cliente/:id', use(async (req, res) => {
     const id = req.params.id
@@ -39,7 +189,7 @@ router.get('/cliente/:id', use(async (req, res) => {
 }))
 router.get('/comentarios/:id', use(async (req, res) => {
     const id = req.params.id
-    const data = await SPModels.ComentarioCliente.find({ idCliente: id , tipoComentario: "ComentarioAgregado" }).sort({ fechaCreacion: -1 }).lean()
+    const data = await SPModels.ComentarioCliente.find({ idCliente: id, tipoComentario: "ComentarioAgregado" }).sort({ fechaCreacion: -1 }).lean()
     res.send(data)
 }))
 router.post('/comentarios', use(async (req, res) => {
@@ -91,17 +241,17 @@ router.post('/operacionesPayment/:id', use(async (req, res) => {
 // POST INSERT
 router.post('/cliente', upload.single("myFile"), use(async (req, res) => {
     const fs = require('fs')
-    console.log(req.body)
+    console.log(req.user)
     const newFile = await File.create({
         name: req.file.filename,
     });
-    const { nombreCliente, rfcCliente, tag, nombreContacto, puestoContacto, celularContacto, whatsappContacto, eMailContacto, pais, estado, codigoPostal, direccion, giro } = req.body
+    const { nombreCliente, rfcCliente, vendedor, tag, nombreContacto, puestoContacto, celularContacto, whatsappContacto, eMailContacto, pais, estado, codigoPostal, direccion, giro } = req.body
     const dataInsert = await SPModels.Cliente.findOne({ nombreCliente: nombreCliente }).lean()
     if (dataInsert) {
         req.flash('error_msg', 'Cliente ya existe en el sistema')
         res.redirect('/cliente')
     } else {
-        const newInsert = new SPModels.Cliente({ nombreCliente, rfcCliente, tag: tag[0], nombreContacto, puestoContacto, celularContacto, whatsappContacto, eMailContacto, pais, estado, codigoPostal, direccion, giro, foto: req.file.filename, idOrganizacion: req.user.idOrg, usuarioCreador: req.user._id })
+        const newInsert = new SPModels.Cliente({ nombreCliente, rfcCliente, tag: tag[0],idVendedor:vendedor[0], nombreContacto, puestoContacto, celularContacto, whatsappContacto, eMailContacto, pais, estado, codigoPostal, direccion, giro, foto: req.file.filename, idOrganizacion: req.user.idOrg, usuarioCreador: req.user._id })
         await newInsert.save(async function (err, doc, numbersAffected) {
             const newInsertMsg = new SPModels.ComentarioCliente({ idCliente: doc._id, tipoComentario: "CreacionCliente", comentario: "Cliente Creado Por : " + req.user.User + "(" + req.user.NombreRol + ")", idOrganizacion: req.user.idOrg, usuarioCreador: req.user._id })
             await newInsertMsg.save()
@@ -115,8 +265,8 @@ router.post('/cliente', upload.single("myFile"), use(async (req, res) => {
 router.post('/cliente/:id', upload.single("myFile"), async (req, res) => {
     const id = req.params.id
     console.log(req.body)
-    const { nombreCliente, rfcCliente, nombreContacto, puestoContacto, celularContacto, whatsappContacto, eMailContacto, pais, estado, codigoPostal, direccion, giro } = req.body
-    await SPModels.Cliente.findOneAndUpdate({ _id: id }, { nombreCliente, rfcCliente, nombreContacto, puestoContacto, celularContacto, whatsappContacto, eMailContacto, pais, estado, codigoPostal, direccion, giro, idOrganizacion: req.user.idOrg, usuarioCreador: req.user._id })
+    const { nombreCliente, rfcCliente, nombreContacto, puestoContacto, celularContacto,vendedor, whatsappContacto, eMailContacto, pais, estado, codigoPostal, direccion, giro } = req.body
+    await SPModels.Cliente.findOneAndUpdate({ _id: id }, { nombreCliente, rfcCliente,idVendedor:vendedor[0], nombreContacto, puestoContacto, celularContacto, whatsappContacto, eMailContacto, pais, estado, codigoPostal, direccion, giro, idOrganizacion: req.user.idOrg, usuarioCreador: req.user._id })
     const newInsertMsg = new SPModels.ComentarioCliente({ idCliente: id, tipoComentario: "ModificacionCliente", comentario: "Cliente Modificado Por : " + req.user.User + "(" + req.user.NombreRol + ")", idOrganizacion: req.user.idOrg, usuarioCreador: req.user._id })
     await newInsertMsg.save()
     req.flash('success_msg', 'Cliente modificado')
