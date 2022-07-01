@@ -1,373 +1,478 @@
+<style>
+    .pagination span {
+        cursor: pointer;
+        position: relative;
+        display: block;
+        padding: 0.5rem 0.75rem;
+        margin-left: -1px;
+        line-height: 1.25;
+        color: #4e73df;
+        background-color: #fff;
+        border: 1px solid #dddfeb;
+    }
 
+    .page.disabled {
+        opacity: .3;
+        pointer-events: none;
+        cursor: not-allowed;
+    }
+
+    .page.current {
+        color: blue;
+        background: #f3f3f3;
+    }
+</style>
 <div class="container-fluid mt-3">
     <div class="card">
         <div class="card-body">
-            <h4 class="card-title">Cliente</h4>
             <div class="button-icon">
                 <button type="button" class="btn mb-1 btn-primary" data-toggle="modal"
                     data-target=".add-user">Agregar<span class="btn-icon-right"><i class="icon-plus"></i></span>
                 </button>
                 <input type="text" class="form-control visually-hidden" id="idCliente" name="idCliente">
                 <div class="modal fade add-user" tabindex="-1" role="dialog" aria-hidden="true">
-                    <div class="modal-dialog modal-lg">
-                        <div class="modal-content">
-                            <div class="modal-header">
-                                <h5 class="modal-title">Añadir Cliente</h5>
-                                <button type="button" class="close" data-dismiss="modal"><span>&times;</span>
-                                </button>
-                            </div>
-                            <div class="login-form-bg h-100">
-                                <div class="container h-100">
-                                    <div class="row justify-content-center h-100">
-                                        <div class="col-xl-12">
-                                            <div class="form-input-content">
-                                                <div class="card login-form mb-0">
-                                                    <div class="card-body pt-5">
-                                                        <ul class="nav nav-tabs" id="myTab" role="tablist">
-                                                            <li class="nav-item" role="presentation">
-                                                                <button class="nav-link active" id="home-tab"
-                                                                    data-bs-toggle="tab" data-bs-target="#home"
-                                                                    type="button" role="tab" aria-controls="home"
-                                                                    aria-selected="true">Datos del Cliente</button>
-                                                            </li>
-                                                            <li class="nav-item" role="presentation">
-                                                                <button class="nav-link visually-hidden" id="profile-tab"
-                                                                    data-bs-toggle="tab" data-bs-target="#profile"
-                                                                    type="button" role="tab" aria-controls="profile"
-                                                                    aria-selected="false" >Comentarios</button>
-                                                            </li>
-                                                            <li class="nav-item" role="presentation">
-                                                                <button class="nav-link visually-hidden" id="contact-tab"
-                                                                    data-bs-toggle="tab" data-bs-target="#contact"
-                                                                    type="button" role="tab" aria-controls="contact"
-                                                                    aria-selected="false">Operaciones</button>
-                                                            </li>
-                                                        </ul>
-                                                        <div class="tab-content" id="myTabContent">
-                                                            <div class="tab-pane fade show active" id="home"
-                                                                role="tabpanel" aria-labelledby="home-tab">
-                                                                <form id="submit" class="row g-3 needs-validation"
-                                                                    action="/cliente" enctype="multipart/form-data"
-                                                                    method="POST">
-                                                                    <div class="accordion accordion-flush"
-                                                                        id="accordionFlushExample">
-                                                                        <div class="accordion-item">
-                                                                            <h2 class="accordion-header"
-                                                                                id="flush-headingOne">
-                                                                                <button
-                                                                                    class="accordion-button collapsed"
-                                                                                    type="button"
-                                                                                    data-bs-toggle="collapse"
-                                                                                    data-bs-target="#flush-collapseOne"
-                                                                                    aria-expanded="false"
-                                                                                    aria-controls="flush-collapseOne">
-                                                                                    Razón Social
-                                                                                </button>
-                                                                            </h2>
-                                                                            <div id="flush-collapseOne"
-                                                                                class="accordion-collapse collapse"
-                                                                                aria-labelledby="flush-headingOne"
-                                                                                data-bs-parent="#accordionFlushExample">
-                                                                                <div class="accordion-body">
-                                                                                    <div class="form-group">
-                                                                                        <label
-                                                                                            for="nombreCliente">Nombre/Razón
-                                                                                            Social
-                                                                                            del Cliente</label>
-                                                                                        <input type="text"
-                                                                                            name="nombreCliente"
-                                                                                            class="form-control"
-                                                                                            id="nombreCliente"
-                                                                                            placeholder="Captura el Nombre/Razón Social del Cliente">
+                    <form id="submit" name="submit" class="row g-3 needs-validation" action="/cliente"
+                        enctype="multipart/form-data" method="POST">
+                        <div class="modal-dialog modal-lg">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title">Añadir Cliente</h5>
+                                    <button type="button" class="close" data-dismiss="modal"><span>&times;</span>
+                                    </button>
+                                </div>
+                                <div class="login-form-bg h-100">
+                                    <div id="modalloader">
+                                        <div class="loader">
+                                            <svg class="circular" viewBox="25 25 50 50">
+                                                <circle class="path" cx="50" cy="50" r="20" fill="none" stroke-width="3"
+                                                    stroke-miterlimit="10" />
+                                            </svg>
+                                        </div>
+                                    </div>
+                                    <div id="modal-wrapper" class="container h-100">
+                                        <div class="row justify-content-center h-100">
+                                            <div class="col-xl-12">
+                                                <div class="form-input-content">
+                                                    <div class="card login-form mb-0">
+                                                        <div class="card-body pt-5">
+                                                            <ul class="nav nav-tabs" id="myTab" role="tablist">
+                                                                <li class="nav-item" role="presentation">
+                                                                    <button class="nav-link active"
+                                                                        style="background-color:#0565fb;color:white"
+                                                                        id="rznSocial-tab" data-bs-toggle="tab"
+                                                                        data-bs-target="#rznSocial" type="button"
+                                                                        role="tab" aria-controls="rznSocial"
+                                                                        aria-selected="true">Razón
+                                                                        Social</button>
+                                                                </li>
+                                                                <li class="nav-item" role="presentation">
+                                                                    <button class="nav-link"
+                                                                        style="background-color:#4E0AFA;color:white"
+                                                                        id="datos-tab" data-bs-toggle="tab"
+                                                                        data-bs-target="#datos" type="button" role="tab"
+                                                                        aria-controls="datos"
+                                                                        aria-selected="false">Datos
+                                                                        del Cliente</button>
+                                                                </li>
+                                                                <li class="nav-item" role="presentation">
+                                                                    <button class="nav-link visually-hidden"
+                                                                        style="background-color:#FCD33B;color:white"
+                                                                        id="comentario-tab" data-bs-toggle="tab"
+                                                                        data-bs-target="#comentario" type="button"
+                                                                        role="tab" aria-controls="comentario"
+                                                                        aria-selected="false">Comentarios</button>
+                                                                </li>
+                                                                <li class="nav-item" role="presentation">
+                                                                    <button class="nav-link visually-hidden"
+                                                                        style="background-color:#13D66C;color:white"
+                                                                        id="ventas-tab" data-bs-toggle="tab"
+                                                                        data-bs-target="#ventas" type="button"
+                                                                        role="tab" aria-controls="ventas"
+                                                                        aria-selected="false">Ventas</button>
+                                                                </li>
+                                                                <li class="nav-item" role="presentation">
+                                                                    <button class="nav-link visually-hidden"
+                                                                        style="background-color:#D5ED21;color:white"
+                                                                        id="movimientos-tab" data-bs-toggle="tab"
+                                                                        data-bs-target="#movimientos" type="button"
+                                                                        role="tab" aria-controls="movimientos"
+                                                                        aria-selected="false">Historial
+                                                                        Movimientos</button>
+                                                                </li>
+                                                            </ul>
+                                                            <div class="tab-content" id="myTabContent">
+                                                                <div class="tab-pane fade show active" id="rznSocial"
+                                                                    role="tabpanel" aria-labelledby="rznSocial">
+                                                                    <div class="card">
+                                                                        <div class="card-body">
+                                                                            <div class="container">
+                                                                                <div class="row">
+                                                                                    <div class="col-sm">
+                                                                                        <div class="form-group">
+                                                                                            <label
+                                                                                                for="nombreCliente">Nombre/Razón
+                                                                                                Social
+                                                                                                del Cliente</label>
+                                                                                            <input type="text"
+                                                                                                name="nombreCliente"
+                                                                                                class="form-control"
+                                                                                                id="nombreCliente"
+                                                                                                placeholder="Captura el Nombre/Razón Social del Cliente">
+                                                                                        </div>
                                                                                     </div>
-                                                                                    <div class="form-group">
-                                                                                        <label for="rfcCliente">RFC
-                                                                                            del Cliente</label>
-                                                                                        <input type="text"
-                                                                                            name="rfcCliente"
-                                                                                            class="form-control"
-                                                                                            id="rfcCliente"
-                                                                                            placeholder="Captura el rfcCliente del Cliente">
+                                                                                    <div class="col-sm">
+                                                                                        <div class="form-group">
+                                                                                            <label for="rfcCliente">RFC
+                                                                                                del Cliente</label>
+                                                                                            <input type="text"
+                                                                                                name="rfcCliente"
+                                                                                                class="form-control"
+                                                                                                id="rfcCliente"
+                                                                                                placeholder="Captura el rfcCliente del Cliente">
+                                                                                        </div>
                                                                                     </div>
-                                                                                    <div class="form-group">
-                                                                                        <label for="tag">Tag de
-                                                                                            Embudo</label>
-                                                                                        <input class="form-control"
-                                                                                            id="tag" name="tag">
-                                                                                        <input type="text"
-                                                                                            class="form-control visually-hidden"
-                                                                                            id="tg" name="tg">
-                                                                                    </div>
-                                                                                     <div class="form-group">
-                                                                                        <label for="vendedor">Vendedor</label>
-                                                                                        <input class="form-control"
-                                                                                            id="vendedor" name="vendedor">
-                                                                                        <input type="text"
-                                                                                            class="form-control visually-hidden"
-                                                                                            id="vend" name="vend">
-                                                                                    </div>
-                                                                                    <div class="form-group">
-                                                                                        <label for="pais">País</label>
-                                                                                        <input type="text" name="pais"
-                                                                                            class="form-control"
-                                                                                            id="pais"
-                                                                                            placeholder="Captura el pais">
-                                                                                    </div>
-                                                                                    <div class="form-group">
-                                                                                        <label
-                                                                                            for="estado">Estado</label>
-                                                                                        <input type="text" name="estado"
-                                                                                            class="form-control"
-                                                                                            id="estado"
-                                                                                            placeholder="Captura el estado">
-                                                                                    </div>
-                                                                                    <div class="form-group">
-                                                                                        <label
-                                                                                            for="codigoPostal">C.P.</label>
-                                                                                        <input type="text"
-                                                                                            name="codigoPostal"
-                                                                                            class="form-control"
-                                                                                            id="codigoPostal"
-                                                                                            placeholder="Captura el Codigo Postal">
-                                                                                    </div>
-                                                                                    <div class="form-group">
-                                                                                        <label
-                                                                                            for="direccion">Dirección</label>
-                                                                                        <input type="text"
-                                                                                            name="direccion"
-                                                                                            class="form-control"
-                                                                                            id="direccion"
-                                                                                            placeholder="Captura la Dirección">
-                                                                                    </div>
-                                                                                    <div class="form-group">
-                                                                                        <label for="giro">Giro</label>
-                                                                                        <input type="text" name="giro"
-                                                                                            class="form-control"
-                                                                                            id="giro"
-                                                                                            placeholder="Captura la Dirección">
-                                                                                    </div>
-                                                                                    <div class="custom-file">
-                                                                                        <input type="file"
-                                                                                            class="custom-file-input"
-                                                                                            id="myFile" name="myFile"
-                                                                                            aria-describedby="inputGroupFileAddon01">
-                                                                                        <label class="custom-file-label"
-                                                                                            for="inputGroupFile01">Logo/Foto</label>
+                                                                                    <div class="col-sm">
+                                                                                        <div class="form-group">
+                                                                                            <label for="tag">Tag de
+                                                                                                Embudo</label>
+                                                                                            <input class="form-control"
+                                                                                                id="tag" name="tag">
+                                                                                            <input type="text"
+                                                                                                class="form-control visually-hidden"
+                                                                                                id="tg" name="tg">
+                                                                                        </div>
                                                                                     </div>
                                                                                 </div>
-                                                                            </div>
-                                                                        </div>
-                                                                        <div class="accordion-item">
-                                                                            <h2 class="accordion-header"
-                                                                                id="flush-headingTwo">
-                                                                                <button
-                                                                                    class="accordion-button collapsed"
-                                                                                    type="button"
-                                                                                    data-bs-toggle="collapse"
-                                                                                    data-bs-target="#flush-collapseTwo"
-                                                                                    aria-expanded="false"
-                                                                                    aria-controls="flush-collapseTwo">
-                                                                                    Datos del Contacto
-                                                                                </button>
-                                                                            </h2>
-                                                                            <div id="flush-collapseTwo"
-                                                                                class="accordion-collapse collapse"
-                                                                                aria-labelledby="flush-headingTwo"
-                                                                                data-bs-parent="#accordionFlushExample">
-                                                                                <div class="accordion-body">
-
-                                                                                    <div class="form-group">
-                                                                                        <label
-                                                                                            for="nombreContacto">Nombre
-                                                                                            del
-                                                                                            Contacto</label>
-                                                                                        <input type="text"
-                                                                                            name="nombreContacto"
-                                                                                            class="form-control"
-                                                                                            id="nombreContacto"
-                                                                                            placeholder="Captura el Nombre del Contacto">
+                                                                                <div class="row">
+                                                                                    <div class="col-sm">
+                                                                                        <div class="form-group">
+                                                                                            <label
+                                                                                                for="vendedor">Vendedor</label>
+                                                                                            <input class="form-control"
+                                                                                                id="vendedor"
+                                                                                                name="vendedor">
+                                                                                            <input type="text"
+                                                                                                class="form-control visually-hidden"
+                                                                                                id="vend" name="vend">
+                                                                                        </div>
                                                                                     </div>
-                                                                                    <div class="form-group">
-                                                                                        <label
-                                                                                            for="puestoContacto">Puesto
-                                                                                            del
-                                                                                            Contacto</label>
-                                                                                        <input type="text"
-                                                                                            name="puestoContacto"
-                                                                                            class="form-control"
-                                                                                            id="puestoContacto"
-                                                                                            placeholder="Captura el Puesto del Contacto">
+                                                                                    <div class="col-sm">
+                                                                                        <div class="form-group">
+                                                                                            <label
+                                                                                                for="pais">País</label>
+                                                                                            <input type="text"
+                                                                                                name="pais"
+                                                                                                class="form-control"
+                                                                                                id="pais"
+                                                                                                placeholder="Captura el pais">
+                                                                                        </div>
                                                                                     </div>
-                                                                                    <div class="form-group">
-                                                                                        <label
-                                                                                            for="celularContacto">Telefono
-                                                                                            del
-                                                                                            Contacto</label>
-                                                                                        <input type="text"
-                                                                                            name="celularContacto"
-                                                                                            class="form-control"
-                                                                                            id="celularContacto"
-                                                                                            placeholder="Captura el Telefono del Contacto">
-                                                                                    </div>
-                                                                                    <div class="form-group">
-                                                                                        <label for="eMailContacto">eMail
-                                                                                            del
-                                                                                            Contacto</label>
-                                                                                        <input type="email"
-                                                                                            name="eMailContacto"
-                                                                                            class="form-control"
-                                                                                            id="eMailContacto"
-                                                                                            placeholder="Captura el eMail del Contacto"
-                                                                                            email="email">
-                                                                                    </div>
-                                                                                    <div class="form-group">
-                                                                                        <label
-                                                                                            for="whatsappContacto">Whatsapp
-                                                                                            del
-                                                                                            Contacto</label>
-                                                                                        <input type="text"
-                                                                                            name="whatsappContacto"
-                                                                                            class="form-control"
-                                                                                            id="whatsappContacto"
-                                                                                            placeholder="Captura el Whatsapp del Contacto">
+                                                                                    <div class="col-sm">
+                                                                                        <div class="form-group">
+                                                                                            <label
+                                                                                                for="estado">Estado</label>
+                                                                                            <input type="text"
+                                                                                                name="estado"
+                                                                                                class="form-control"
+                                                                                                id="estado"
+                                                                                                placeholder="Captura el estado">
+                                                                                        </div>
                                                                                     </div>
                                                                                 </div>
-                                                                            </div>
-                                                                        </div>
-                                                                    </div>
-                                                                    <div class="modal-footer">
-                                                                        <button id="crear" type="submit"
-                                                                            class="btn login-form__btn submit w-100">Crear
-                                                                        </button>
-                                                                        <button id="guardar" type="submit"
-                                                                            class="btn login-form__btn visually-hidden submit w-100">Guardar
-                                                                        </button>
-                                                                    </div>
-                                                                </form>
-                                                            </div>
-                                                            <div class="tab-pane fade" id="profile" role="tabpanel"
-                                                                aria-labelledby="profile-tab">
-                                                                <div class="container">
-                                                                    <div class="row">
-                                                                        <div class="col-lg-12">
-                                                                            <h3 class="text-center">Historial de
-                                                                                Comentarios</h3>
-                                                                            <div class="form-group">
-                                                                                <label
-                                                                                    for="comentarioCliente">Comentario</label>
-                                                                                <input type="text"
-                                                                                    name="comentarioCliente"
-                                                                                    class="form-control"
-                                                                                    id="comentarioCliente"
-                                                                                    placeholder="Captura el comentario">
-                                                                                <br>
-                                                                                <button type="button"
-                                                                                    class="btn mb-1  btn-success"
-                                                                                    id="addComent">
-                                                                                    Agregar<span
-                                                                                        class="btn-icon-right"><i
-                                                                                            class="icon-plus"></i></span>
-                                                                            </div>
-                                                                            <ul class="timeline" id="comentarios">
-
-                                                                            </ul>
-                                                                        </div>
-                                                                    </div>
-                                                                </div>
-                                                            </div>
-                                                            <div class="tab-pane fade" id="contact" role="tabpanel"
-                                                                aria-labelledby="contact-tab">
-                                                                <div class="container ">
-                                                                    <div class="row">
-                                                                        <div class="col-lg-12">
-                                                                            <div class="table-responsive">
-                                                                                <button id="addRowOP"
-                                                                                    class="btn mb-1 btn-success">Agregar
-                                                                                    Operación<span
-                                                                                        class="btn-icon-right"><i
-                                                                                            class="icon-plus"></i></span>
-                                                                                </button>
-                                                                                <div id="OperacionForm">
-                                                                                    <div class="form-group">
-                                                                                        <label for="folioFiscal">Folio
-                                                                                            Fiscal</label>
-                                                                                        <input type="text"
-                                                                                            class="form-control"
-                                                                                            id="folioFiscal"
-                                                                                            aria-describedby="folioFiscal"
-                                                                                            placeholder="Captura el Folio de la factura">
+                                                                                <div class="row">
+                                                                                    <div class="col-sm">
+                                                                                        <div class="form-group">
+                                                                                            <label
+                                                                                                for="codigoPostal">C.P.</label>
+                                                                                            <input type="text"
+                                                                                                name="codigoPostal"
+                                                                                                class="form-control"
+                                                                                                id="codigoPostal"
+                                                                                                placeholder="Captura el Codigo Postal">
+                                                                                        </div>
                                                                                     </div>
-                                                                                    <div class="form-group">
-                                                                                        <label for="serie">Serie</label>
-                                                                                        <input type="text"
-                                                                                            class="form-control"
-                                                                                            id="serie"
-                                                                                            aria-describedby="serie"
-                                                                                            placeholder="Captura la Serie de la factura">
+                                                                                    <div class="col-sm">
+                                                                                        <div class="form-group">
+                                                                                            <label
+                                                                                                for="direccion">Dirección</label>
+                                                                                            <input type="text"
+                                                                                                name="direccion"
+                                                                                                class="form-control"
+                                                                                                id="direccion"
+                                                                                                placeholder="Captura la Dirección">
+                                                                                        </div>
                                                                                     </div>
-                                                                                    <div class="form-group">
-                                                                                        <label for="folio">Folio</label>
-                                                                                        <input type="text"
-                                                                                            class="form-control"
-                                                                                            id="folio"
-                                                                                            aria-describedby="folio"
-                                                                                            placeholder="Captura el folio de la factura">
+                                                                                    <div class="col-sm">
+                                                                                        <div class="form-group">
+                                                                                            <label
+                                                                                                for="giro">Giro</label>
+                                                                                            <input type="text"
+                                                                                                name="giro"
+                                                                                                class="form-control"
+                                                                                                id="giro"
+                                                                                                placeholder="Captura la Dirección">
+                                                                                        </div>
                                                                                     </div>
-                                                                                    <div class="form-group">
-                                                                                        <label
-                                                                                            for="montoFactura">Monto</label>
-                                                                                        <input type="text"
-                                                                                            class="form-control"
-                                                                                            id="montoFactura"
-                                                                                            aria-describedby="montoFactura"
-                                                                                            placeholder="Captura el monto de la factura">
-                                                                                    </div>
-                                                                                    <div class="form-group">
-                                                                                        <label class="m-t-20">Fecha
-                                                                                            Factura</label>
-                                                                                        <input type="text"
-                                                                                            class="form-control"
-                                                                                            name="fechaFactura"
-                                                                                            id="fechaFactura">
-                                                                                    </div>
-                                                                                    <div class="form-group">
-                                                                                        <label class="m-t-20">Fecha
-                                                                                            Límite</label>
-                                                                                        <input type="text"
-                                                                                            class="form-control"
-                                                                                            name="fechaLimite"
-                                                                                            id="fechaLimite">
-                                                                                    </div>
-                                                                                    <button id="addOP"
-                                                                                        class="btn btn-primary">Agregar</button>
                                                                                 </div>
-                                                                                <table id="operaciones"
-                                                                                    class="table table-striped table-bordered zero-configuration">
-                                                                                    <thead>
-                                                                                        <tr>
-                                                                                            <th>Folio Fiscal</th>
-                                                                                            <th>Serie</th>
-                                                                                            <th>Folio</th>
-                                                                                            <th>Monto</th>
-                                                                                            <th>Estado Factura</th>
-                                                                                            <th>Fecha Factura</th>
-                                                                                            <th>Fecha Límite</th>
-                                                                                            <th>Fecha Pago</th>
-                                                                                            <th colspan="2">
-                                                                                            </th>
-                                                                                        </tr>
-                                                                                    </thead>
-                                                                                    <tbody>
-                                                                                    </tbody>
-                                                                                </table>
+                                                                                <div class="row">
+                                                                                    <div class="col-lg-12">
+                                                                                        <div class="custom-file">
+                                                                                            <input type="file"
+                                                                                                class="custom-file-input"
+                                                                                                id="myFile"
+                                                                                                name="myFile"
+                                                                                                aria-describedby="inputGroupFileAddon01">
+                                                                                            <label
+                                                                                                class="custom-file-label"
+                                                                                                for="inputGroupFile01">Logo/Foto</label>
+                                                                                        </div>
+                                                                                    </div>
+                                                                                </div>
                                                                             </div>
                                                                         </div>
                                                                     </div>
                                                                 </div>
+                                                                <div class="tab-pane fade" id="datos" role="tabpanel"
+                                                                    aria-labelledby="datos">
+                                                                    <div class="card">
+                                                                        <div class="card-body">
+                                                                            <div class="container">
+                                                                                <div class="row">
+                                                                                    <div class="col-sm">
+                                                                                        <div class="form-group">
+                                                                                            <label
+                                                                                                for="nombreContacto">Nombre
+                                                                                                del
+                                                                                                Contacto</label>
+                                                                                            <input type="text"
+                                                                                                name="nombreContacto"
+                                                                                                class="form-control"
+                                                                                                id="nombreContacto"
+                                                                                                placeholder="Captura el Nombre del Contacto">
+                                                                                        </div>
+                                                                                    </div>
+                                                                                    <div class="col-sm">
+                                                                                        <div class="form-group">
+                                                                                            <label
+                                                                                                for="puestoContacto">Puesto
+                                                                                                del
+                                                                                                Contacto</label>
+                                                                                            <input type="text"
+                                                                                                name="puestoContacto"
+                                                                                                class="form-control"
+                                                                                                id="puestoContacto"
+                                                                                                placeholder="Captura el Puesto del Contacto">
+                                                                                        </div>
+                                                                                    </div>
+                                                                                    <div class="col-sm">
+                                                                                        <div class="form-group">
+                                                                                            <label
+                                                                                                for="celularContacto">Telefono
+                                                                                                del
+                                                                                                Contacto</label>
+                                                                                            <input type="text"
+                                                                                                name="celularContacto"
+                                                                                                class="form-control"
+                                                                                                id="celularContacto"
+                                                                                                placeholder="Captura el Telefono del Contacto">
+                                                                                        </div>
+                                                                                    </div>
+                                                                                </div>
+                                                                                <div class="row">
+                                                                                    <div class="col-sm">
+                                                                                        <div class="form-group">
+                                                                                            <label
+                                                                                                for="eMailContacto">eMail
+                                                                                                del
+                                                                                                Contacto</label>
+                                                                                            <input type="email"
+                                                                                                name="eMailContacto"
+                                                                                                class="form-control"
+                                                                                                id="eMailContacto"
+                                                                                                placeholder="Captura el eMail del Contacto"
+                                                                                                email="email">
+                                                                                        </div>
+                                                                                    </div>
+                                                                                    <div class="col-sm">
+                                                                                        <div class="form-group">
+                                                                                            <label
+                                                                                                for="whatsappContacto">Whatsapp
+                                                                                                del
+                                                                                                Contacto</label>
+                                                                                            <input type="text"
+                                                                                                name="whatsappContacto"
+                                                                                                class="form-control"
+                                                                                                id="whatsappContacto"
+                                                                                                placeholder="Captura el Whatsapp del Contacto">
+                                                                                        </div>
+                                                                                    </div>
 
+                                                                                </div>
+                                                                                <div class="modal-footer">
+                                                                                    <button id="crear" type="submit"
+                                                                                        class="btn login-form__btn submit w-100">Crear
+                                                                                    </button>
+                                                                                    <button id="guardar" type="submit"
+                                                                                        class="btn login-form__btn visually-hidden submit w-100">Guardar
+                                                                                    </button>
+                                                                                </div>
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                                <div class="tab-pane fade" id="comentario"
+                                                                    role="tabpanel" aria-labelledby="comentario">
+                                                                    <div class="card">
+                                                                        <div class="card-body">
+                                                                            <div class="container">
+                                                                                <div class="row">
+                                                                                    <div class="col-lg-12">
+                                                                                        <h3 class="text-center">
+                                                                                            Historial de
+                                                                                            Comentarios</h3>
+                                                                                        <div class="form-group">
+                                                                                            <label
+                                                                                                for="comentarioCliente">Comentario</label>
+                                                                                            <input type="text"
+                                                                                                name="comentarioCliente"
+                                                                                                class="form-control"
+                                                                                                id="comentarioCliente"
+                                                                                                placeholder="Captura el comentario">
+                                                                                            <br>
+                                                                                            <button type="button"
+                                                                                                class="btn mb-1  btn-success"
+                                                                                                id="addComent">
+                                                                                                Agregar<span
+                                                                                                    class="btn-icon-right"><i
+                                                                                                        class="icon-plus"></i></span>
+                                                                                        </div>
+                                                                                        <ul class="timeline"
+                                                                                            id="comentarios">
+
+                                                                                        </ul>
+                                                                                    </div>
+                                                                                </div>
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                                <div class="tab-pane fade" id="ventas" role="tabpanel"
+                                                                    aria-labelledby="ventas">
+                                                                    <div class="card">
+                                                                        <div class="card-body">
+                                                                            <div class="container ">
+                                                                                <div class="row">
+                                                                                    <div class="col-lg-12">
+                                                                                        <div class="table-responsive">
+                                                                                            <button id="addRowOP"
+                                                                                                class="btn mb-1 btn-success">Agregar
+                                                                                                Venta<span
+                                                                                                    class="btn-icon-right"><i
+                                                                                                        class="icon-plus"></i></span>
+                                                                                            </button>
+                                                                                            <div id="OperacionForm">
+                                                                                                <div class="form-group">
+                                                                                                    <label
+                                                                                                        for="folio">Folio
+                                                                                                        Factura</label>
+                                                                                                    <input type="text"
+                                                                                                        class="form-control"
+                                                                                                        id="folio"
+                                                                                                        aria-describedby="folio"
+                                                                                                        placeholder="Captura el folio de la factura">
+                                                                                                </div>
+                                                                                                <div class="form-group">
+                                                                                                    <label
+                                                                                                        for="montoFactura">Monto</label>
+                                                                                                    <input type="text"
+                                                                                                        class="form-control"
+                                                                                                        id="montoFactura"
+                                                                                                        aria-describedby="montoFactura"
+                                                                                                        placeholder="Captura el monto de la factura">
+                                                                                                </div>
+                                                                                                <div class="form-group">
+                                                                                                    <label
+                                                                                                        class="m-t-20">Fecha
+                                                                                                        Factura</label>
+                                                                                                    <input type="text"
+                                                                                                        class="form-control"
+                                                                                                        name="fechaFactura"
+                                                                                                        id="fechaFactura">
+                                                                                                </div>
+                                                                                                <div class="form-group">
+                                                                                                    <label
+                                                                                                        class="m-t-20">Fecha
+                                                                                                        Límite</label>
+                                                                                                    <input type="text"
+                                                                                                        class="form-control"
+                                                                                                        name="fechaLimite"
+                                                                                                        id="fechaLimite">
+                                                                                                </div>
+                                                                                                <div class="form-group">
+                                                                                                    <label
+                                                                                                        for="folioFiscal">Folio
+                                                                                                        Fiscal</label>
+                                                                                                    <input type="text"
+                                                                                                        class="form-control"
+                                                                                                        id="folioFiscal"
+                                                                                                        aria-describedby="folioFiscal"
+                                                                                                        placeholder="Captura el Folio de la factura">
+                                                                                                </div>
+                                                                                                <button id="addOP"
+                                                                                                    class="btn btn-primary">Agregar</button>
+                                                                                            </div>
+                                                                                            <table id="operaciones"
+                                                                                                class="table table-striped table-bordered zero-configuration">
+                                                                                                <thead>
+                                                                                                    <tr>
+                                                                                                        <th>Folio</th>
+                                                                                                        <th>Monto</th>
+                                                                                                        <th>Estado
+                                                                                                            Factura
+                                                                                                        </th>
+                                                                                                        <th>Fecha
+                                                                                                            Factura
+                                                                                                        </th>
+                                                                                                        <th>Fecha Límite
+                                                                                                        </th>
+                                                                                                        <th>Fecha Pago
+                                                                                                        </th>
+                                                                                                        <th colspan="2">
+                                                                                                        </th>
+                                                                                                    </tr>
+                                                                                                </thead>
+                                                                                                <tbody>
+                                                                                                </tbody>
+                                                                                            </table>
+                                                                                        </div>
+                                                                                    </div>
+                                                                                </div>
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                                <div class="tab-pane fade" id="movimientos"
+                                                                    role="tabpanel" aria-labelledby="movimientos">
+                                                                    <div class="card">
+                                                                        <div class="card-body">
+                                                                            <div class="container">
+                                                                                <div class="row">
+                                                                                    <div class="col-lg-12">
+                                                                                        <h3 class="text-center">
+                                                                                            Historial de
+                                                                                            Movimientos</h3>
+                                                                                        <ul class="timeline"
+                                                                                            id="movimientoli">
+
+                                                                                        </ul>
+                                                                                    </div>
+                                                                                </div>
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
                                                             </div>
                                                         </div>
-
                                                     </div>
                                                 </div>
                                             </div>
@@ -375,53 +480,70 @@
                                     </div>
                                 </div>
                             </div>
-
                         </div>
-                    </div>
+                    </form>
                 </div>
                 <div class="table-responsive">
-                    <table class="table table-striped table-bordered zero-configuration">
-                        <thead>
-                            <tr>
-                                <th colspan="2">Cliente</th>
-                                <th>Nombre</th>
-                                <th>Puesto Contacto</th>
-                                <th colspan="3">Acciones</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {{#each data}}
-                            <tr>
-                                <td>
-                                    <div class="circle"><img src="/files/{{foto}}" style="width:60px;"></div>
-                                </td>
-                                <td>{{nombreCliente}}</td>
-                                <td>{{nombreContacto}}</td>
-                                <td>{{puestoContacto}}</td>
-                                <td>
-                                    <button id="ver" data-url="/cliente/{{_id}}" data-toggle="modal"
-                                        data-target=".add-user2" type="submit" class="badge bg-info">
-                                        <i class="fa fa-eye	 m-r-5"></i>
-                                    </button>
-                                </td>
-                                <td>
-                                    <button id="edit" data-url="/cliente/{{_id}}" data-toggle="modal"
-                                        data-target=".add-user" type="submit" class="badge bg-success">
-                                        <i class="fa fa-pencil m-r-5"></i>
-                                    </button>
-                                </td>
-                                <td>
-                                    <form action="/cliente/{{_id}}" method="POST">
-                                        <input type="hidden" name="_method" value="DELETE">
-                                        <button type="submit" class="badge bg-danger">
-                                            <i class="fa fa-close"></i>
+                    <ul class="nav nav-tabs" id="myTab" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link clibtn" style="background-color:gray;color:white" id="all"
+                                data-bs-toggle="tab" data-bs-target="#rznSocial" type="button" role="tab"
+                                aria-controls="rznSocial" aria-selected="true">Todos
+                            </button>
+                        </li>
+                        {{#each Tags}}
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link clibtn" style="background-color:{{colorTag}};color:white"
+                                id="{{nombre}}">{{nombre}}
+                            </button>
+                        </li>
+                        {{/each}}
+                    </ul>
+                    <div class="tablecont">
+                        <table id="tblparent" class="table table-light table-bordered zero-configuration">
+                            <thead>
+                                <tr>
+                                    <th colspan="2">Cliente</th>
+                                    <th>Nombre</th>
+                                    <th>Puesto Contacto</th>
+                                    <th colspan="3">Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody class="tblcont">
+                                {{#each data}}
+                                <tr class="{{Tag}} single-item">
+                                    <td style="width:2%">
+                                        <div class="circle"><img src="/files/{{foto}}" style="width:60px;"></div>
+                                    </td>
+                                    <td>{{nombreCliente}}</td>
+                                    <td>{{nombreContacto}}</td>
+                                    <td>{{puestoContacto}}</td>
+                                    <td style="width:2%">
+                                        <button id="ver" data-url="/cliente/{{_id}}" data-type="readOnly"
+                                            data-toggle="modal" data-target=".add-user" type="submit" class="btnV">
+                                            <i class="fa fa-search"></i>
                                         </button>
-                                    </form>
-                                </td>
-                            </tr>
-                            {{/each}}
-                        </tbody>
-                    </table>
+                                    </td>
+                                    <td style="width:2%">
+                                        <button id="edit" data-url="/cliente/{{_id}}" data-type="edit"
+                                            data-toggle="modal" data-target=".add-user" type="submit" class="btnE">
+                                            <i class="fa fa-pencil"></i>
+                                        </button>
+                                    </td>
+                                    <td style="width:2%">
+                                        <form action="/cliente/{{_id}}" method="POST">
+                                            <input type="hidden" name="_method" value="DELETE">
+                                            <button type="submit" class="btnD">
+                                                <i class="fa fa-trash"></i>
+                                            </button>
+                                        </form>
+                                    </td>
+                                </tr>
+                                {{/each}}
+                            </tbody>
+                        </table>
+                    </div>
+
                 </div>
             </div>
         </div>

@@ -1,25 +1,23 @@
-function getOPeraciones(idCliente) {
+async function getOPeraciones(idCliente) {
     $('#operaciones > tbody').empty();
     let url = "/operaciones/" + idCliente
-    $.getJSON(url, function (dataop) {
+    return $.getJSON(url, function (dataop) {
         $.each(dataop, function (key, val) {
             console.log(val)
             let FFact = moment(val.fechaFactura).format("DD/MM/YYYY")
             let FLim = moment(val.fechaLimite).format("DD/MM/YYYY")
             let FPag = moment(val.fechaPago).format("DD/MM/YYYY hh:mm:ss")
-            let btnPago = '<td><button  type="submit" onclick="paymentMark(this)" class="badge bg-success" data-url="/operacionesPayment/' + val._id + '" data-target=".paymentMark"><i class="fa fa-money m-r-5"></i></button></td><td><button  type="submit" onclick="deleteOP(this)" data-url="/operaciones/' + val._id + '"  class="badge bg-danger"><i class="fa fa-close"></i></button></td>'
+            let btnPago = '<td><button type="button" onclick="paymentMark(this)" class="btnE" data-url="/operacionesPayment/' + val._id + '" data-target=".paymentMark"><i class="fa fa-plus"></i></button></td><td><button type="button" onclick="deleteOP(this)" data-url="/operaciones/' + val._id + '"  class="btnD"><i class="fa fa-trash"></i></button></td>'
             let montoFactura = '$' + parseFloat(val.montoFactura, 10).toFixed(2).replace(/(\d)(?=(\d{3})+\.)/g, "$1,").toString()
             if (val.estadoFactura === "Por Pagar") {
                 FPag = "Sin Pagar"
             } else if (val.estadoFactura === "Pagada") {
-                btnPago = '<td colspan=2><button  type="submit" onclick="deleteOP(this)" data-url="/operaciones/' + val._id + '"  class="badge bg-danger"><i class="fa fa-close"></i></button></td>'
+                btnPago = '<td colspan=2><button type="button" onclick="deleteOP(this)" data-url="/operaciones/' + val._id + '"  class="btnD"><i class="fa fa-trash"></i></button></td>'
             }
 
-            $("#operaciones > tbody:last-child").append('<tr><td>' + val.folioFiscal + '</td><td>' + val.serie + '</td><th>' + val.folio + '</td><th>' + montoFactura + '</td><td>' + val.estadoFactura + '</td><td>' + FFact + '</td><td>' + FLim + '</td><td>' + FPag + '</td>' + btnPago + '</tr>');
+            $("#operaciones > tbody:last-child").append('<tr><td>' + val.folio + '</td><td>' + montoFactura + '</td><td>' + val.estadoFactura + '</td><td>' + FFact + '</td><td>' + FLim + '</td><td>' + FPag + '</td>' + btnPago + '</tr>');
         });
     })
-    $("#OperacionForm").addClass("visually-hidden");
-    $("#addRowOP").prop('disabled', false);
 }
 function vendChart() {
     if ($('#ventasChart').length) {
@@ -136,6 +134,9 @@ function vendChart() {
                 },
                 options: {
                     responsive: true,
+                    legend: {
+                        position: 'left'
+                    },
                     interaction: {
                         intersect: false,
                     },
@@ -153,10 +154,10 @@ function vendChart() {
     }
 
 }
-function getComments(idCliente) {
+async function getComments(idCliente) {
     let url = "/comentarios/" + idCliente
     var classli = ""
-    $.getJSON(url, function (datacom) {
+    return $.getJSON(url, function (datacom) {
         $('#comentarios').empty()
         $.each(datacom, function (key, val) {
             console.log(val)
@@ -184,24 +185,68 @@ function getComments(idCliente) {
 
             $("#comentarios").append('<li ' + classli + '><div class="timeline-badge"><i class="glyphicon glyphicon-check"></i></div><div class="timeline-panel"><div class="timeline-heading"><p class="text-right"><button type="button" onclick="deleteCom(this)" data-url="/comentarios/' + val._id + '" class="close" aria-label="Close"><span aria-hidden="true">&times;</span></button></p><p><small class="text-muted"><i class="glyphicon glyphicon-time"></i>' + dif + '</small></p></div><div class="timeline-body"><p>' + val.comentario + '</p></div></div></li>');
         });
+        $("#addComent").prop('disabled', false);
     })
-    $("#addComent").prop('disabled', false);
+
+}
+async function getmovimientos(idCliente) {
+    let url = "/movimientos/" + idCliente
+    var classli = ""
+    return $.getJSON(url, function (datacom) {
+        $('#movimientoli').empty()
+        $.each(datacom, function (key, val) {
+            console.log(val)
+
+            if (classli === "") {
+                classli = 'class="timeline-inverted"'
+            } else {
+                classli = ""
+            }
+            var FF = moment(moment(val.fechaCreacion).toISOString());
+            var FH = moment(moment(Date.now()).toISOString());
+            var difd = FH.diff(FF, 'days')
+            var difh = FH.diff(FF, 'hours')
+            var difm = FH.diff(FF, 'minutes')
+            var dif = ""
+            if (difd === 0) {
+                if (difh === 0) {
+                    dif = "Realizado hace " + difm + " minutos"
+                } else {
+                    dif = "Realizado hace " + difh + " horas"
+                }
+            } else {
+                dif = "Realizado hace " + difd + " dias"
+            }
+
+            $("#movimientoli").append('<li ' + classli + '><div class="timeline-badge"><i class="glyphicon glyphicon-check"></i></div><div class="timeline-panel"><div class="timeline-heading"><p><small class="text-muted"><i class="glyphicon glyphicon-time"></i>' + dif + '</small></p></div><div class="timeline-body"><p>' + val.comentario + '</p></div></div></li>');
+        });
+    })
 }
 function paymentMark(e) {
+    $('#modalloader').show();
     let idCliente = $('#idCliente').val()
     let urlUPDATE = e.getAttribute("data-url");
     $.post(urlUPDATE).then(function () {
-        getOPeraciones(idCliente)
+        getOPeraciones(idCliente).then(function (returndata) {
+            $('#modalloader').fadeOut(500);
+            $("#OperacionForm").addClass("visually-hidden");
+            $("#addRowOP").prop('disabled', false);
+        })
     });
 }
 function deleteOP(e) {
+    $('#modalloader').show();
     let idCliente = $('#idCliente').val()
     let urlDelete = e.getAttribute("data-url");
     $.ajax({
         url: urlDelete,
         type: 'DELETE'
     }).then(function () {
-        getOPeraciones(idCliente)
+        getOPeraciones(idCliente).then(function (returndata) {
+            $('#modalloader').fadeOut(500);
+            $("#OperacionForm").addClass("visually-hidden");
+            $("#addRowOP").prop('disabled', false);
+        })
     })
 }
 function deleteCom(e) {
@@ -212,6 +257,7 @@ function deleteCom(e) {
         type: 'DELETE'
     }).then(function () {
         getComments(idCliente)
+        getmovimientos(idCliente)
     })
 }
 function fillOrgChart() {
@@ -332,7 +378,142 @@ function editMeta(e) {
     });
 }
 
-$(document).ready(function () {
+function init() {
+    var pagify = {
+		items: {},
+		container: null,
+		totalPages: 1,
+		perPage: 3,
+		currentPage: 0,
+		createNavigation: function() {
+			this.totalPages = Math.ceil(this.items.length / this.perPage);
+
+			$('.pagination', this.container.parent()).remove();
+			var pagination = $('<div class="pagination"></div>').append('<span class="nav prev disabled" data-next="false"><</span>');
+
+			for (var i = 0; i < this.totalPages; i++) {
+				var pageElClass = "page";
+				if (!i)
+					pageElClass = "page current";
+				var pageEl = '<span class="' + pageElClass + '" data-page="' + (
+				i + 1) + '">' + (
+				i + 1) + "</span>";
+				pagination.append(pageEl);
+			}
+			pagination.append('<span class="nav next" data-next="true">></span>');
+
+			this.container.after(pagination);
+
+			var that = this;
+			$("body").off("click", ".nav");
+			this.navigator = $("body").on("click", ".nav", function() {
+				var el = $(this);
+				that.navigate(el.data("next"));
+			});
+
+			$("body").off("click", ".page");
+			this.pageNavigator = $("body").on("click", ".page", function() {
+				var el = $(this);
+				that.goToPage(el.data("page"));
+			});
+		},
+		navigate: function(next) {
+			// default perPage to 5
+			if (isNaN(next) || next === undefined) {
+				next = true;
+			}
+			$(".pagination .nav").removeClass("disabled");
+			if (next) {
+				this.currentPage++;
+				if (this.currentPage > (this.totalPages - 1))
+					this.currentPage = (this.totalPages - 1);
+				if (this.currentPage == (this.totalPages - 1))
+					$(".pagination .nav.next").addClass("disabled");
+				}
+			else {
+				this.currentPage--;
+				if (this.currentPage < 0)
+					this.currentPage = 0;
+				if (this.currentPage == 0)
+					$(".pagination .nav.prev").addClass("disabled");
+				}
+
+			this.showItems();
+		},
+		updateNavigation: function() {
+			var pages = $(".pagination .page");
+			pages.removeClass("current");
+			$('.pagination .page[data-page="' + (
+			this.currentPage + 1) + '"]').addClass("current");
+		},
+		goToPage: function(page) {
+
+			this.currentPage = page - 1;
+
+			$(".pagination .nav").removeClass("disabled");
+			if (this.currentPage == (this.totalPages - 1))
+				$(".pagination .nav.next").addClass("disabled");
+
+			if (this.currentPage == 0)
+				$(".pagination .nav.prev").addClass("disabled");
+			this.showItems();
+		},
+		showItems: function() {
+			this.items.hide();
+			var base = this.perPage * this.currentPage;
+			this.items.slice(base, base + this.perPage).show();
+            console.log(base)
+            console.log(this.currentPage)
+			this.updateNavigation();
+		},
+		init: function(container, items, perPage) {
+            console.log(this)
+			this.container = container;
+			this.currentPage = 0;
+			this.totalPages = 1;
+			this.perPage = perPage;
+			this.items = items;
+			this.createNavigation();
+			this.showItems();
+		}
+	};
+
+    // stuff it all into a jQuery method!
+    $.fn.pagify = function (perPage, itemSelector) {
+        var el = $(this);
+        console.log(el)
+        var items = $(itemSelector, el);
+        console.log(items)
+        // default perPage to 5
+        if (isNaN(perPage) || perPage === undefined) {
+            perPage = 3;
+        }
+
+
+        pagify.init(el, items, perPage);
+    };
+    $(".inbxcontainer").pagify(10, ".single-item:visible");
+    $(".tblcont").pagify(10, ".single-item:visible");
+    var $btns = $('.inboxbtn').click(function () {
+        if (this.id == 'all') {
+            $('#parent > div').fadeIn(450);
+        } else {
+            var $el = $('.' + this.id).fadeIn(450);
+            $('#parent > div').not($el).hide();
+
+        }
+        $(".inbxcontainer").pagify(10, ".single-item:visible");
+    })
+    var $btns2 = $('.clibtn').click(function () {
+        if (this.id == 'all') {
+            $('#tblparent > tbody > tr').fadeIn(450);
+        } else {
+            var $el = $('.' + this.id).fadeIn(450);
+            $('#tblparent  > tbody >  tr').not($el).hide();
+
+        }
+        $(".tblcont").pagify(10, ".single-item:visible");
+    })
     var quantitiy = 0;
     let u = document.URL;
     fillOrgChart()
@@ -390,6 +571,7 @@ $(document).ready(function () {
         $("#addComent").prop('disabled', true);
         $.post("/comentarios", { idCliente, comentario }).then(function () {
             getComments(idCliente)
+
         })
     });
     $("#OperacionForm").addClass("visually-hidden");
@@ -397,8 +579,12 @@ $(document).ready(function () {
         $("#addRowOP").prop('disabled', true);
         $("#OperacionForm").removeClass("visually-hidden");
     });
-
     $("#addOP").click(function (e, m) {
+        $("#addOP").prop('disabled', true);
+        $('#modalloader').show();
+        grabaOP()
+    });
+    async function grabaOP() {
         let idCliente = $('#idCliente').val()
         let folioFiscal = $('#folioFiscal').val()
         let serie = $('#serie').val()
@@ -407,11 +593,14 @@ $(document).ready(function () {
         let fechaFactura = $('#fechaFactura').val()
         let fechaLimite = $('#fechaLimite').val()
         $.post("/operaciones", { idCliente, folioFiscal, serie, folio, montoFactura, fechaFactura, fechaLimite }).then(function () {
-            getOPeraciones(idCliente)
+            getOPeraciones(idCliente).then(function (returndata) {
+                $('#modalloader').fadeOut(500);
+                $("#OperacionForm").addClass("visually-hidden");
+                $("#addRowOP").prop('disabled', false);
+                $("#addOP").prop('disabled', false);
+            });
         })
-
-    });
-
+    }
     $(".needs-validation").validate(
         {
             errorClass: "invalid-feedback animated fadeInDown",
@@ -517,7 +706,7 @@ $(document).ready(function () {
             return data.nombre
         }
     });
-    var cls = $('#Jefe').magicSuggest({
+    var jfe = $('#Jefe').magicSuggest({
         allowFreeEntries: false,
         data: '/userJson',
         name: 'nombre',
@@ -659,18 +848,19 @@ $(document).ready(function () {
         if ($("#tblPermisos").length) {
             $("#tblPermisos").find('tbody').detach();
             $('#tblPermisos').append($('<tbody>'));
-            $.post("/PermisoJson", { idOrg: idOrg }, function (perm) {
-                $.post("/modOrgJson", { idOrg: idOrg }, function (mod) {
+            $.post("/PermisoJson", function (perm) {
+                $.post("/modOrgJson", { idOrg: $('#idOrg').val() }, function (mod) {
+                    console.log(mod)
                     $.each(mod, function (imod, vmod) {
-                        $.each(vmod.Mod, function (immod, vmmod) {
-                            row = ""
-                            row = row + '<tr><th class="row-header">' + vmmod.Nombre + '</th>'
-                            $.each(perm, function (iperm, vperm) {
-                                row = row + '<td><input name="Permisos[]" value="' + vperm.Nombre + '|' + vmmod.Nombre + '" type="checkbox"></td>'
-                            });
-                            row = row + '</tr>'
-                            $("#tblPermisos > tbody").append(row);
+                        console.log(vmod)
+                        row = ""
+                        row = row + '<tr><th class="row-header">' + vmod.NombreMenu + '</th>'
+                        $.each(perm, function (iperm, vperm) {
+                            row = row + '<td><input name="Permisos[]" value="' + vperm.Nombre + '|' + vmod.NombreMenu + '" type="checkbox"></td>'
                         });
+                        row = row + '</tr>'
+                        $("#tblPermisos > tbody").append(row);
+                        console.log(row)
 
                     });
                 });
@@ -723,7 +913,6 @@ $(document).ready(function () {
     $(rol).on('selectionchange', function (e, m) {
         $('#rl').val(this.getValue())
     });
-
     $.validator.addMethod("strong_password", function (value, element) {
         let password = value;
         if (!(/^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[.@#$%&])(.{8,20}$)/.test(password))) {
@@ -756,126 +945,346 @@ $(document).ready(function () {
         }
         return true;
     }, "email invalido")
-    function abreModal(e) {
-        $.getJSON(e, function (data) {
-            for (var key in data) {
-                if (data.hasOwnProperty(key)) {
-                    $('#' + key).val(data[key]);
+
+
+}
+$(document).ready(function () {
+    init()
+    async function abreModal(e) {
+        if (e) {
+            return $.getJSON(e, function (data) {
+                for (var key in data) {
+                    if (data.hasOwnProperty(key)) {
+                        $('#' + key).val(data[key]);
+                    }
                 }
-            }
-            getComments(data._id)
-            getOPeraciones(data._id)
-            if (data._id) {
-                $('#idCliente').val(data._id);
-            }
-
-            if (data.User) {
-                $('#nombre').val(data.User);
-            } else if (data.Nombre) {
-                $('#nombre').val(data.Nombre);
-            } else if (data.nombre) {
-                $('#nombre').val(data.nombre);
-            }
-            if (data.email) {
-                $('#email').val(data.email);
-            }
-            if (data.telefono) {
-                $('#telefono').val(data.telefono);
-            }
-            if (data.whatsapp) {
-                $('#whatsapp').val(data.whatsapp);
-            }
-            if ($(tag).length) {
-                $.post("/tagJson", { idOrg: $('#idOrg').val() }, function (tags) {
-                    tag.setData(tags)
-                }).then(function () {
-
-                    tag.setValue([data.tag]);
-                });
-            }
-            if ($(vend).length) {
-                $.post("/vendedorJson", function (ven) {
-                    vend.setData(ven)
-                }).then(function () {
-
-                    vend.setValue([data.idVendedor]);
-                });
-            }
-            if ($(org).length) {
-                if (data.idOrg) {
-                    org.setValue([data.idOrg]);
-                } else {
-                    org.setValue([data.idOrganizacion]);
+                getComments(data._id)
+                getmovimientos(data._id)
+                $('#modalloader').show();
+                getOPeraciones(data._id).then(function (returndata) {
+                    $('#modalloader').fadeOut(500);
+                    $("#OperacionForm").addClass("visually-hidden");
+                    $("#addRowOP").prop('disabled', false);
+                })
+                if (data._id) {
+                    $('#idCliente').val(data._id);
                 }
-            }
-            if ($(rol).length) {
-                $.post("/rolJson", { idOrg: $('#idOrg').val() }, function (roles) {
-                    rol.setData(roles)
-                }).then(function () {
-                    rol.setValue([data.idRol]);
-                });
-            }
-            if ($(lic).length) {
-                $.post("/licenciaJson", { idOrg: $('#idOrg').val() }, function (licencias) {
-                    lic.setData(licencias)
-                }).then(function () {
-                    lic.setValue([data.Licencia]);
-                });
-            }
-            if ($(seg).length) {
-                $.post("/segJson", function (segmento) {
-                    seg.setData(segmento)
-                }).then(function () {
 
-                    seg.setValue([data.Segmento]);
+                if (data.User) {
+                    $('#nombre').val(data.User);
+                } else if (data.Nombre) {
+                    $('#nombre').val(data.Nombre);
+                } else if (data.nombre) {
+                    $('#nombre').val(data.nombre);
+                }
+                if (data.email) {
+                    $('#email').val(data.email);
+                }
+                if (data.telefono) {
+                    $('#telefono').val(data.telefono);
+                }
+                if (data.whatsapp) {
+                    $('#whatsapp').val(data.whatsapp);
+                }
+                var mp = $('#menuPadre').magicSuggest({
+                    data: '/menuJson',
+                    name: 'MenuPadre',
+                    maxSelection: 1,
+                    valueField: 'idMenuPadre',
+                    displayField: 'idMenuPadre',
+                    renderer: function (data) {
+                        return data.idMenuPadre;
+                    },
+                    allowFreeEntries: true
                 });
-            }
-            if ($(clsP).length) {
-                $.post("/iconoJson", function (classes) {
-                    cls.setData(classes)
-                    clsP.setData(classes)
-                }).then(function () {
-                    cls.setValue([data.Class]);
-                    clsP.setValue([data.ClassPadre])
+                var seg = $('#Segmento').magicSuggest({
+                    data: '/segJson',
+                    name: 'Segmento',
+                    maxSelection: 1,
+                    valueField: 'Segmento',
+                    displayField: 'Segmento',
+                    renderer: function (data) {
+                        return data.Segmento;
+                    },
+                    allowFreeEntries: true
                 });
-            }
-            if ($(modorg).length) {
-                $.post("/modsOrgJson", { idOrg: $('#idOrg').val() }, function (Modulos) {
-                    modorg.setData(Modulos)
-                }).then(function () {
-                    modorg.setValue([data.idModulo]);
+                var cls = $('#Class').magicSuggest({
+                    allowFreeEntries: false,
+                    data: '/iconoJson',
+                    name: 'Class',
+                    maxSelection: 1,
+                    resultsField: 'Class',
+                    valueField: 'iconoClass',
+                    displayField: 'iconoClass',
+                    renderer: function (data) {
+                        return '<icon class="' + data.iconoClass + '"/> ' + data.iconoClass
+                    }
                 });
-            }
-            $("#crear").addClass("visually-hidden ");
+                var usr = $('#usuario').magicSuggest({
+                    allowFreeEntries: false,
+                    data: '/userJson',
+                    name: 'nombre',
+                    maxSelection: 1,
+                    resultsField: 'nombre',
+                    valueField: '_id',
+                    displayField: 'nombre',
+                    renderer: function (data) {
+                        return data.nombre
+                    }
+                });
+                var vend = $('#vendedor').magicSuggest({
+                    allowFreeEntries: false,
+                    data: '/vendedorJson',
+                    name: 'nombre',
+                    maxSelection: 1,
+                    resultsField: 'nombre',
+                    valueField: '_id',
+                    displayField: 'nombre',
+                    renderer: function (data) {
+                        return data.nombre
+                    }
+                });
+                var jfe = $('#Jefe').magicSuggest({
+                    allowFreeEntries: false,
+                    data: '/userJson',
+                    name: 'nombre',
+                    maxSelection: 1,
+                    resultsField: 'nombre',
+                    valueField: '_id',
+                    displayField: 'nombre',
+                    renderer: function (data) {
+                        return data.nombre
+                    }
+                });
+                var clsP = $('#ClassPadre').magicSuggest({
+                    allowFreeEntries: false,
+                    data: '/iconoJson',
+                    name: 'Class',
+                    maxSelection: 1,
+                    resultsField: 'Class',
+                    valueField: 'iconoClass',
+                    displayField: 'iconoClass',
+                    renderer: function (data) {
+                        return '<icon class="' + data.iconoClass + '"/> ' + data.iconoClass
+                    }
+                });
+                var url = $('#Url').magicSuggest({
+                    allowFreeEntries: false,
+                    data: '/urlJson',
+                    name: 'Url',
+                    maxSelection: 1,
+                    resultsField: 'Url',
+                    valueField: 'Url',
+                    displayField: 'Url',
+                    renderer: function (data) {
+                        return data.Url
+                    }
+                });
+                var org = $('#organizacion').magicSuggest({
+                    data: '/orgJson',
+                    name: 'organizacion',
+                    maxSelection: 1,
+                    valueField: '_id',
+                    displayField: 'Nombre',
+                    required: true,
+                    renderer: function (data) {
+                        return data.Nombre;
+                    },
+                    allowFreeEntries: false
+                });
 
-            $("#password").addClass("visually-hidden ");
-            $("#confirm_password").addClass("visually-hidden ");
-            $("#myFile").addClass("visually-hidden ");
-            $("#confirm_password").addClass("visually-hidden ");
-            $("#password").removeAttr("strong_password")
-            $("#password").rules('remove', 'required');
-            $("#confirm_password").removeAttr("strong_password")
-            $("#confirm_password").rules('remove', 'required');
-            $("#guardar").removeClass("visually-hidden ");
-            $("label[for='password']").addClass("visually-hidden ");
-            $("label[for='myFile']").addClass("visually-hidden ");
-            $("label[for='inputGroupFile01']").addClass("visually-hidden ");
-            $("#profile-tab").removeClass("visually-hidden ");
-            $("#contact-tab").removeClass("visually-hidden ");
-            $("#myFile").rules('remove', 'required');
-            $("label[for='confirm_password']").addClass("visually-hidden ");
-            //set form action
-            $('#submit').attr('action', e);
-        })
+                var lic = $('#licencia').magicSuggest({
+                    data: '/licenciaJson',
+                    dataUrlParams: { idOrg: $('#idOrg').val() },
+                    name: 'licencia',
+                    maxSelection: 1,
+                    valueField: 'Token',
+                    displayField: 'Token',
+                    required: true,
+                    renderer: function (data) {
+                        if (data.Activa) {
+                            bg = "badge bg-success";
+                            valor = "Activa";
+                        } else {
+                            bg = "badge bg-danger"
+                            valor = "Inactiva";
+                        }
+                        return '<div class="row"><b class="font-weight-bold small">' + data.Token +
+                            '</b></div><div class="row"><b class="font-weight-bold small">Valida desde: ' + moment(data.sinceDate).format("DD/MM/YYYY") +
+                            ' Valida hasta: ' + moment(data.expireDate).format("DD/MM/YYYY") + '</b></div><span class="' + bg + '">' + valor + '</span>'
+                    },
+                    allowFreeEntries: false
+                });
+                var rol = $('#rol').magicSuggest({
+                    data: '/rolJson',
+                    dataUrlParams: { idOrg: $('#idOrg').val() },
+                    name: 'rol',
+                    maxSelection: 1,
+                    valueField: '_id',
+                    displayField: 'nombre',
+                    required: true,
+                    renderer: function (data) {
+                        return data.nombre;
+                    },
+                    allowFreeEntries: false
+                });
+                var cli = $('#cliente').magicSuggest({
+                    data: '/clienteJson',
+                    dataUrlParams: { idOrg: $('#idOrg').val() },
+                    name: 'cliente',
+                    maxSelection: 1,
+                    valueField: '_id',
+                    displayField: 'nombre',
+                    required: true,
+                    renderer: function (data) {
+                        return data.nombre;
+                    },
+                    allowFreeEntries: false
+                });
+                var tag = $('#tag').magicSuggest({
+                    data: '/tagJson',
+                    dataUrlParams: { idOrg: $('#idOrg').val() },
+                    name: 'tag',
+                    maxSelection: 1,
+                    valueField: '_id',
+                    displayField: 'nombre',
+                    required: true,
+                    renderer: function (data) {
+                        return data.nombre;
+                    },
+                    allowFreeEntries: false
+                });
+                var mod = $('#modulo').magicSuggest({
+                    data: '/modJson',
+                    name: 'modulo',
+                    maxSelection: 1,
+                    valueField: '_id',
+                    displayField: 'Nombre',
+                    required: true,
+                    renderer: function (data) {
+                        return data.Nombre;
+                    },
+                    allowFreeEntries: false
+                });
+                var modorg = $('#moduloorg').magicSuggest({
+                    data: '/modsOrgJson',
+                    dataUrlParams: { idOrg: $('#idOrg').val() },
+                    name: 'modulo',
+                    maxSelection: 1,
+                    valueField: 'idMod',
+                    displayField: 'Nombre',
+                    required: true,
+                    renderer: function (data) {
+                        return data.Nombre;
+                    },
+                    allowFreeEntries: false
+                });
+                if ($(tag).length) {
+                    $.post("/tagJson", { idOrg: $('#idOrg').val() }, function (tags) {
+                        tag.setData(tags)
+                    }).then(function () {
+
+                        tag.setValue([data.tag]);
+                    });
+                }
+                if ($(vend).length) {
+                    $.post("/vendedorJson", function (ven) {
+                        vend.setData(ven)
+                    }).then(function () {
+
+                        vend.setValue([data.idVendedor]);
+                    });
+                }
+                if ($(org).length) {
+                    if (data.idOrg) {
+                        org.setValue([data.idOrg]);
+                    } else {
+                        org.setValue([data.idOrganizacion]);
+                    }
+                }
+                if ($(rol).length) {
+                    $.post("/rolJson", { idOrg: $('#idOrg').val() }, function (roles) {
+                        rol.setData(roles)
+                    }).then(function () {
+                        rol.setValue([data.idRol]);
+                    });
+                }
+                if ($(lic).length) {
+                    $.post("/licenciaJson", { idOrg: $('#idOrg').val() }, function (licencias) {
+                        lic.setData(licencias)
+                    }).then(function () {
+                        lic.setValue([data.Licencia]);
+                    });
+                }
+                if ($(seg).length) {
+                    $.post("/segJson", function (segmento) {
+                        seg.setData(segmento)
+                    }).then(function () {
+
+                        seg.setValue([data.Segmento]);
+                    });
+                }
+                if ($(clsP).length) {
+                    $.post("/iconoJson", function (classes) {
+                        cls.setData(classes)
+                        clsP.setData(classes)
+                    }).then(function () {
+                        cls.setValue([data.Class]);
+                        clsP.setValue([data.ClassPadre])
+                    });
+                }
+                if ($(modorg).length) {
+                    $.post("/modsOrgJson", { idOrg: $('#idOrg').val() }, function (Modulos) {
+                        modorg.setData(Modulos)
+                    }).then(function () {
+                        modorg.setValue([data.idModulo]);
+                    });
+                }
+                $("#crear").addClass("visually-hidden ");
+
+                $("#password").addClass("visually-hidden ");
+                $("#confirm_password").addClass("visually-hidden ");
+                $("#myFile").addClass("visually-hidden ");
+                $("#confirm_password").addClass("visually-hidden ");
+                $("#password").removeAttr("strong_password")
+                $("#password").rules('remove', 'required');
+                $("#confirm_password").removeAttr("strong_password")
+                $("#confirm_password").rules('remove', 'required');
+                $("#guardar").removeClass("visually-hidden ");
+                $("label[for='password']").addClass("visually-hidden ");
+                $("label[for='myFile']").addClass("visually-hidden ");
+                $("label[for='inputGroupFile01']").addClass("visually-hidden ");
+                $("#datos-tab").removeClass("visually-hidden ");
+                $("#comentario-tab").removeClass("visually-hidden ");
+                $("#ventas-tab").removeClass("visually-hidden ");
+                $("#movimientos-tab").removeClass("visually-hidden ");
+                $("#myFile").rules('remove', 'required');
+                $("label[for='confirm_password']").addClass("visually-hidden ");
+                //set form action
+                $('#submit').attr('action', e);
+            })
+        }
+
     }
     $('*[data-target=".add-user"]').on('click', function (e, m) {
         var url = this.getAttribute("data-url");
-        abreModal(url)
+        var type = this.getAttribute("data-type");
+        abreModal(url).finally(function (returndata) {
+            $('#modalloader').fadeOut(500);
+            $('#modal-wrapper').addClass('show')
+            if (type === "readOnly") {
+                $('#submit input').attr('readonly', 'readonly');
+                $("#crear").addClass("visually-hidden ");
+                $("#guardar").addClass("visually-hidden ");
+                $("#addRowOP").addClass("visually-hidden ");
+                $("#addComent").addClass("visually-hidden ");
+            }
+        });
+
     });
     $('.modal').on('hidden.bs.modal', function () {
-        location.reload();
+        location.reload()
     })
-
     $("#submit").submit(function (e) {
         if ($(".needs-validation").valid()) {
             $("#crear").attr("disabled", true);
@@ -885,5 +1294,4 @@ $(document).ready(function () {
 
         return true;
     });
-
 });

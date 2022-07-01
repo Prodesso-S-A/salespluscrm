@@ -98,8 +98,8 @@ router.get('/vendedorChartJson', use(async (req, res) => {
                 "idCli": { "$toObjectId": "$idCliente" },
                 "montoFactura": 1,
                 "estadoFactura": 1,
-                "mesFactura":{ $dateToString: { format: "%m", date: "$fechaFactura" } },
-                "yearFactura":{ $dateToString: { format: "%Y", date: "$fechaFactura" } },
+                "mesFactura": { $dateToString: { format: "%m", date: "$fechaFactura" } },
+                "yearFactura": { $dateToString: { format: "%Y", date: "$fechaFactura" } },
                 _id: 0
             }
         },
@@ -111,7 +111,7 @@ router.get('/vendedorChartJson', use(async (req, res) => {
                 "pipeline": [{
                     $project: {
                         "idVend": { "$toObjectId": "$idVendedor" },
-                        "idVendedor":1,
+                        "idVendedor": 1,
                         _id: 0
                     }
                 }],
@@ -160,9 +160,9 @@ router.get('/vendedorChartJson', use(async (req, res) => {
                 "metaVend": 0,
                 "Cli": 0,
                 "Vend": 0,
-                "idCli":0,
-                "idVend":0,
-                "idVendedor":0
+                "idCli": 0,
+                "idVend": 0,
+                "idVendedor": 0
             }
         }
     ])
@@ -175,8 +175,8 @@ router.post('/vendedorChartJson', use(async (req, res) => {
                 "idCli": { "$toObjectId": "$idCliente" },
                 "montoFactura": 1,
                 "estadoFactura": 1,
-                "mesFactura":{ $dateToString: { format: "%m", date: "$fechaFactura" } },
-                "yearFactura":{ $dateToString: { format: "%Y", date: "$fechaFactura" } },
+                "mesFactura": { $dateToString: { format: "%m", date: "$fechaFactura" } },
+                "yearFactura": { $dateToString: { format: "%Y", date: "$fechaFactura" } },
                 _id: 0
             }
         },
@@ -188,8 +188,8 @@ router.post('/vendedorChartJson', use(async (req, res) => {
                 "pipeline": [{
                     $project: {
                         "idVend": { "$toObjectId": "$idVendedor" },
-                        "nombreCliente":1,
-                        "idVendedor":1,
+                        "nombreCliente": 1,
+                        "idVendedor": 1,
                         _id: 0
                     }
                 }],
@@ -238,9 +238,9 @@ router.post('/vendedorChartJson', use(async (req, res) => {
                 "metaVend": 0,
                 "Cli": 0,
                 "Vend": 0,
-                "idCli":0,
-                "idVend":0,
-                "idVendedor":0
+                "idCli": 0,
+                "idVend": 0,
+                "idVendedor": 0
             }
         }
     ])
@@ -527,7 +527,7 @@ router.post('/modOrgJson', use(async (req, res) => {
     const { idOrg } = req.body
 
     const modOrg = await AdminModels.Moduloorganizacion.aggregate([
-        { $match: { idOrganizacion: idOrg[0] } },
+        { $match: { idOrganizacion: idOrg } },
         {
             $project: {
                 "idOrg": { "$toObjectId": "$idOrganizacion" },
@@ -578,6 +578,7 @@ router.post('/modOrgJson', use(async (req, res) => {
             }
         }
     ])
+    console.log(modOrg)
     res.send(modOrg)
 }))
 router.post('/modsOrgJson', use(async (req, res) => {
@@ -875,10 +876,135 @@ router.post('/tagJson', use(async (req, res) => {
     const tag = await SPModels.Tag.find({ idOrganizacion: req.user.idOrg }).lean()
     res.send(tag)
 }))
-router.post('/clienteUpdate', use(async (req, res) => {
-    const { tag, cliente } = req.body
-    await SPModels.Cliente.findOneAndUpdate({ _id: cliente }, { tag: tag, idOrganizacion: req.user.idOrg, usuarioCreador: req.user._id });
-    req.flash('success_msg', 'Cliente modificado')
-    res.redirect('/cliente')
+
+router.get('/usr', use(async (req, res) => {
+    var userModel = []
+
+    userModel = await AdminModels.User.aggregate([
+        { $match: { email: req.user.email } },
+        { $limit: 1 },
+        {
+            $project: {
+                "idOrg": { "$toObjectId": "$idOrganizacion" },
+                "idRol": { "$toObjectId": "$Rol" },
+                "User": "$nombre",
+                "id": 1,
+                "email": 1,
+                "Licencia": 1,
+                "NombreRol": 1,
+                "foto": 1
+            }
+        },
+        {
+            $lookup: {
+                "localField": "idOrg",
+                "from": "organizacions",
+                "foreignField": "_id",
+                "pipeline": [{
+                    $project: {
+                        "NombreOrg": "$Nombre",
+                        "RFCOrg": "$RFC"
+                    }
+                }],
+                "as": "Org"
+            }
+        },
+        {
+            $lookup: {
+                "localField": "Licencia",
+                "from": "licencias",
+                "foreignField": "Token",
+                "pipeline": [{
+                    $project: {
+                        "Licencia": 1,
+                        "sinceDate": 1,
+                        "expireDate": 1
+                    }
+                }],
+                "as": "Lic"
+            }
+        },
+        {
+            $lookup: {
+                "localField": "idRol",
+                "from": "rols",
+                "foreignField": "_id",
+                "pipeline": [{
+                    $project: {
+                        "NombreRol": "$nombre"
+                    }
+                }],
+                "as": "roles"
+            }
+        },
+        {
+            $replaceRoot: { newRoot: { $mergeObjects: [{ $arrayElemAt: ["$roles", 0] }, "$$ROOT"] } }
+        },
+        {
+            $replaceRoot: { newRoot: { $mergeObjects: [{ $arrayElemAt: ["$Lic", 0] }, "$$ROOT"] } }
+        },
+        {
+            $replaceRoot: { newRoot: { $mergeObjects: [{ $arrayElemAt: ["$Org", 0] }, "$$ROOT"] } }
+        },
+        {
+            $project: {
+                "roles": 0
+            }
+        },
+        {
+            $project: {
+                "Lic": 0
+            }
+        },
+        {
+            $project: {
+                "Org": 0
+            }
+        }
+
+    ])
+    var usrMenu = []
+    var usr = userModel[0]
+    var permarr = []
+    var men = []
+    var lig = []
+    var ligSeg = []
+    var idTP = []
+    var idMod = []
+    var rol = await AdminModels.Rol.findOne({ _id: userModel[0].idRol }, { _id: 0, Permisos: 1 }).lean()
+    for (let f of rol.Permisos) {
+        idMod.push(f.idModulo)
+    }
+    var segmentos = await AdminModels.Menu.distinct("Segmento", { 'idModulo': { $in: idMod }, idOrganizacion: userModel[0].idOrg }).lean()
+    for (let seg of segmentos) {
+        var menuPadre = await AdminModels.Menu.distinct("idMenuPadre", { 'idModulo': { $in: idMod }, 'Segmento': { $in: seg }, idOrganizacion: userModel[0].idOrg }).lean()
+        for (let mp of menuPadre) {
+            var menus = await AdminModels.Menu.find({ idMenuPadre: mp, Segmento: seg }).lean()
+            for (let menu of menus) {
+                for (let perm of rol.Permisos) {
+                    if (perm.idModulo == menu.idModulo) {
+                        idTP.push(perm.idtipoPermiso)
+                    }
+                }
+                var tipoPermiso = await AdminModels.Permiso.find({ '_id': { $in: idTP } }, { _id: 0, Nombre: 1 }).lean()
+                for (let x of tipoPermiso) {
+                    permarr.push(x.Nombre)
+                }
+                var mod = await AdminModels.Modulo.findOne({ _id: menu.idModulo }).lean()
+                men.push({ NombreMenu: menu.Nombre, iconoPadre: menu.ClassPadre, icono: menu.Class, Permiso: permarr, Url: mod.Url })
+                idTP=[]
+                permarr=[]
+            }
+            lig.push({ "NombreMenuPadre": mp, "Menu": men })
+
+        }
+        ligSeg.push({ "Segmento": seg, "MenuPadre": lig })
+    }
+    usrMenu.push({ "Ligas": ligSeg })
+    usr['userMenu'] = usrMenu
+    res.send(usr)
 }))
+
+
+
 module.exports = router;

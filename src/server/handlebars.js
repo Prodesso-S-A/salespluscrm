@@ -18,6 +18,19 @@ module.exports = function (hbs) {
         this.switch_value = value;
         return options.fn(this);
     });
+    hbs.handlebars.registerHelper("debug", function(optionalValue) {
+        console.log("Current Context");
+        console.log("====================");
+        console.log(this);
+        if (optionalValue) {
+            console.log("Value");
+            console.log("====================");
+            console.log(optionalValue);
+        }
+    });
+    hbs.handlebars.registerHelper('json', function(context) {
+        return JSON.stringify(context);
+    });
     hbs.handlebars.registerHelper('contrastColor', function (value, options) {
         const hex = value.replace(/#/, '');
         const r = parseInt(hex.substr(0, 2), 16);

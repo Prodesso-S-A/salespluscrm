@@ -6,6 +6,7 @@ const use = require('../config/error')
 const File = require("../models/global").File;
 const multer = require("multer");
 const { v4: uuidv4 } = require('uuid');
+var ObjectID = require('mongodb').ObjectID
 // ⇨ '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed'
 const multerStorage = multer.diskStorage({
     destination: (req, file, cb) => {
@@ -29,11 +30,205 @@ const upload = multer({
 });
 //GET
 router.get('/cliente', use(async (req, res) => {
-    const data = await SPModels.Cliente.find({ idOrganizacion: req.user.idOrg }).lean()
-    res.render('./salesplus/clientes', { data })
+    const data = await SPModels.Cliente.aggregate([
+        { $match: { idOrganizacion: req.user.idOrg.toString() } },
+        {
+            $project: {
+                "idTag": { "$toObjectId": "$tag" },
+                "nombreCliente": 1,
+                "nombreContacto": 1,
+                "puestoContacto": 1,
+                "foto": 1
+            }
+        },
+        {
+            $lookup: {
+                "localField": "idTag",
+                "from": "tags",
+                "foreignField": "_id",
+                "pipeline": [{
+                    $project: {
+                        "Tag": "$nombre",
+                    }
+                }],
+                "as": "TagCont"
+            }
+        },
+        {
+            $replaceRoot: { newRoot: { $mergeObjects: [{ $arrayElemAt: ["$TagCont", 0] }, "$$ROOT"] } }
+        },
+        {
+            $project: {
+                "TagCont": 0
+            }
+        }
+
+    ])
+    const Tags = await SPModels.Tag.find({ idOrganizacion: req.user.idOrg }).lean()
+    res.render('./salesplus/clientes', { data,Tags })
+}))
+router.get('/inbox', use(async (req, res) => {
+    const Mensajes = await SPModels.Mensaje.aggregate([
+        {
+            $project: {
+                "idCli": { "$toObjectId": "$idCliente" },
+                "plataforma": 1,
+                "mensaje": 1,
+                "fechaCreacion": 1,
+                "Tag": 1,
+                "colorTag": 1,
+                "estado": 1
+            }
+        },
+        {
+            $lookup: {
+                "localField": "idCli",
+                "from": "clientes",
+                "foreignField": "_id",
+                "pipeline": [{
+                    $project: {
+                        "idTag": { "$toObjectId": "$tag" },
+                        "Cliente": "$nombreCliente"
+                    }
+                }],
+                "as": "Cli"
+            }
+        },
+        {
+            $lookup: {
+                "localField": "Cli.idTag",
+                "from": "tags",
+                "foreignField": "_id",
+                "pipeline": [{
+                    $project: {
+                        "Tag": "$nombre",
+                    }
+                }],
+                "as": "TagCont"
+            }
+        },
+        {
+            $replaceRoot: { newRoot: { $mergeObjects: [{ $arrayElemAt: ["$Cli", 0] }, "$$ROOT"] } }
+        },
+        {
+            $replaceRoot: { newRoot: { $mergeObjects: [{ $arrayElemAt: ["$TagCont", 0] }, "$$ROOT"] } }
+        },
+        {
+            $project: {
+                "Cli": 0,
+                "TagCont": 0
+            }
+        }
+
+    ])
+    const Tags = await SPModels.Tag.find({ idOrganizacion: req.user.idOrg }).lean()
+    const MsjCant = await SPModels.Mensaje.aggregate([
+        {
+            $group: {
+                _id: "$plataforma",
+                count: { $sum: 1 }
+            }
+        }
+
+    ])
+    const totCant = await SPModels.Mensaje.aggregate([
+        {
+            $group: {
+                _id: null,
+                count: { $sum: 1 }
+            }
+        }
+
+    ])
+    res.render('./salesplus/inbox', { totCant, MsjCant, Tags, Mensajes })
+}))
+router.get('/inboxread', use(async (req, res) => {
+    const id = req.query.id
+    console.log(id)
+    await SPModels.Mensaje.findOneAndUpdate({ _id: id }, { estado: "read" })
+    const Mensaje = await SPModels.Mensaje.aggregate([
+        { $match: { "_id": ObjectID(id) } },
+        {
+            $project: {
+                "idCli": { "$toObjectId": "$idCliente" },
+                "plataforma": 1,
+                "mensaje": 1,
+                "fechaCreacion": 1,
+                "Tag": 1,
+                "colorTag": 1,
+                "estado": 1
+            }
+        },
+        {
+            $lookup: {
+                "localField": "idCli",
+                "from": "clientes",
+                "foreignField": "_id",
+                "pipeline": [{
+                    $project: {
+                        "idTag": { "$toObjectId": "$tag" },
+                        "Cliente": "$nombreCliente"
+                    }
+                }],
+                "as": "Cli"
+            }
+        },
+        {
+            $lookup: {
+                "localField": "Cli.idTag",
+                "from": "tags",
+                "foreignField": "_id",
+                "pipeline": [{
+                    $project: {
+                        "Tag": "$nombre",
+                    }
+                }],
+                "as": "TagCont"
+            }
+        },
+        {
+            $replaceRoot: { newRoot: { $mergeObjects: [{ $arrayElemAt: ["$Cli", 0] }, "$$ROOT"] } }
+        },
+        {
+            $replaceRoot: { newRoot: { $mergeObjects: [{ $arrayElemAt: ["$TagCont", 0] }, "$$ROOT"] } }
+        },
+        {
+            $project: {
+                "Cli": 0,
+                "TagCont": 0
+            }
+        }
+
+    ])
+    console.log(Mensaje)
+    res.render('./salesplus/inboxread', { Mensaje })
 }))
 router.get('/metaVentas', use(async (req, res) => {
     res.render('./salesplus/vendedores')
+}))
+router.get('/reportes', use(async (req, res) => {
+    const id = req.params.id
+    const Dim = []
+    const Temp = []
+    const Metricas = []
+    var idClientes = []
+    const rol = await AdminModel.Rol.find().lean()
+    const user = await AdminModel.User.find({ idOrganizacion: req.user.idOrg }).lean()
+    const cliente = await SPModels.Cliente.find({ idOrganizacion: req.user.idOrg }).lean()
+    const meses = ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"]
+    const anios = ["2018", "2019", "2020", "2021", "2022"]
+    for (let f of cliente) {
+        idClientes.push(f._id)
+    }
+    const operaciones = await SPModels.OperacionCliente.find({ idCliente: { $in: idClientes } }).lean()
+    Dim.push({ Nombre: "Rol", Valores: JSON.stringify(rol) })
+    Dim.push({ Nombre: "Usuarios", Valores: JSON.stringify(user) })
+    Dim.push({ Nombre: "Clientes", Valores: JSON.stringify(cliente) })
+    Metricas.push({ Nombre: "Operaciones", Valores: JSON.stringify(operaciones) })
+    Temp.push({ Nombre: "Meses", Valores: JSON.stringify(meses) })
+    Temp.push({ Nombre: "Años", Valores: JSON.stringify(anios) })
+
+    res.render('./salesplus/reportes', { Dim, Temp, Metricas })
 }))
 router.post('/saveMeta/:id', use(async (req, res) => {
     const { meta } = req.body
@@ -192,6 +387,11 @@ router.get('/comentarios/:id', use(async (req, res) => {
     const data = await SPModels.ComentarioCliente.find({ idCliente: id, tipoComentario: "ComentarioAgregado" }).sort({ fechaCreacion: -1 }).lean()
     res.send(data)
 }))
+router.get('/movimientos/:id', use(async (req, res) => {
+    const id = req.params.id
+    const data = await SPModels.ComentarioCliente.find({ idCliente: id, tipoComentario: { $ne: "ComentarioAgregado" } }).sort({ fechaCreacion: -1 }).lean()
+    res.send(data)
+}))
 router.post('/comentarios', use(async (req, res) => {
     const { idCliente, comentario } = req.body
 
@@ -211,11 +411,11 @@ router.get('/operaciones/:id', use(async (req, res) => {
     res.send(data)
 }))
 router.post('/operaciones', use(async (req, res) => {
-    const { idCliente, folioFiscal, folio, serie, montoFactura, fechaFactura, fechaLimite } = req.body
-    const dataInsert = await SPModels.OperacionCliente.findOne({ folioFiscal: folioFiscal }).lean()
+    const { idCliente, folioFiscal, folio, montoFactura, fechaFactura, fechaLimite } = req.body
+    const dataInsert = await SPModels.OperacionCliente.findOne({ idCliente: idCliente, folio: folio }).lean()
     if (dataInsert) {
     } else {
-        const newInsert = new SPModels.OperacionCliente({ idCliente, folioFiscal, folio, serie, montoFactura, fechaFactura, fechaLimite, idOrganizacion: req.user.idOrg, usuarioCreador: req.user._id })
+        const newInsert = new SPModels.OperacionCliente({ idCliente, folioFiscal, folio, montoFactura, fechaFactura, fechaLimite, idOrganizacion: req.user.idOrg, usuarioCreador: req.user._id })
         await newInsert.save()
         const newInsertMsg = new SPModels.ComentarioCliente({ idCliente: idCliente, tipoComentario: "OperacionAgregada", comentario: "Operación agregada Por : " + req.user.User + "(" + req.user.NombreRol + ")", idOrganizacion: req.user.idOrg, usuarioCreador: req.user._id })
         await newInsertMsg.save()
@@ -251,7 +451,7 @@ router.post('/cliente', upload.single("myFile"), use(async (req, res) => {
         req.flash('error_msg', 'Cliente ya existe en el sistema')
         res.redirect('/cliente')
     } else {
-        const newInsert = new SPModels.Cliente({ nombreCliente, rfcCliente, tag: tag[0],idVendedor:vendedor[0], nombreContacto, puestoContacto, celularContacto, whatsappContacto, eMailContacto, pais, estado, codigoPostal, direccion, giro, foto: req.file.filename, idOrganizacion: req.user.idOrg, usuarioCreador: req.user._id })
+        const newInsert = new SPModels.Cliente({ nombreCliente, rfcCliente, tag: tag[0], idVendedor: vendedor[0], nombreContacto, puestoContacto, celularContacto, whatsappContacto, eMailContacto, pais, estado, codigoPostal, direccion, giro, foto: req.file.filename, idOrganizacion: req.user.idOrg, usuarioCreador: req.user._id })
         await newInsert.save(async function (err, doc, numbersAffected) {
             const newInsertMsg = new SPModels.ComentarioCliente({ idCliente: doc._id, tipoComentario: "CreacionCliente", comentario: "Cliente Creado Por : " + req.user.User + "(" + req.user.NombreRol + ")", idOrganizacion: req.user.idOrg, usuarioCreador: req.user._id })
             await newInsertMsg.save()
@@ -261,17 +461,54 @@ router.post('/cliente', upload.single("myFile"), use(async (req, res) => {
     }
 
 }))
+router.get('/sincronizar', use(async (req, res) => {
+    let arrCli = ["Servicios", "Mecanica", "Sistemas", "Consultor"]
+    let arrCli2 = ["Pedro", "Gilberto", "Daniel", "Hugo"]
+    let arrCli3 = ["SA DE CV", "CV", "SA"]
+    let arrMsj = ["Podrian de favor anexarme una Cotización de 20 Productos", "Que servicios Tienen?", "Donde estan Ubicados?", "Como podriamos tener un acercamiento más personalizado"]
+    let arrPlataforma = ["Instagram", "Facebook", "Whatsapp", "eMail", "SMS", "Otro"]
+    let randMsjSinc = 10
+
+    let cantMsj = Math.floor(Math.random() * randMsjSinc)
+    for (var i = 0; i <= cantMsj; i++) {
+        let Cliente = arrCli[Math.floor(Math.random() * arrCli.length)] + " " + arrCli2[Math.floor(Math.random() * arrCli2.length)] + " " + arrCli3[Math.floor(Math.random() * arrCli3.length)]
+        let Msj = arrMsj[Math.floor(Math.random() * arrMsj.length)]
+        let Plat = arrPlataforma[Math.floor(Math.random() * arrPlataforma.length)]
+        const Clientes = await SPModels.Cliente.findOne({ idOrganizacion: req.user.idOrg, nombreCliente: Cliente }).lean()
+        if (Clientes) {
+            const newMsj = new SPModels.Mensaje({ idCliente: Clientes._id, mensaje: Msj, plataforma: Plat })
+            await newMsj.save()
+
+        } else {
+            const newInsert = new SPModels.Cliente({ nombreCliente: Cliente, rfcCliente: "XAXX010101000", tag: "62be31cfad7d1aa4973c741c", idVendedor: "", nombreContacto: "", puestoContacto: "", celularContacto: "", whatsappContacto: "", eMailContacto: "", pais: "", estado: "", codigoPostal: "", direccion: "", giro: "", foto: "", idOrganizacion: req.user.idOrg, usuarioCreador: req.user._id })
+            await newInsert.save(async function (err, doc, numbersAffected) {
+                console.log(err)
+                const newInsertMsg = new SPModels.ComentarioCliente({ idCliente: doc._id, tipoComentario: "CreacionCliente", comentario: "Cliente Creado Por : " + req.user.User + "(" + req.user.NombreRol + ")", idOrganizacion: req.user.idOrg, usuarioCreador: req.user._id })
+                await newInsertMsg.save()
+                const newMsj = new SPModels.Mensaje({ idCliente: doc._id, mensaje: Msj, plataforma: Plat })
+                await newMsj.save()
+            });
+        }
+        i += i;
+    }
+    req.flash('success_msg', + cantMsj + ' Mensajes Sincronizados')
+    res.redirect('/inbox')
+}))
 // POST UPDATE
 router.post('/cliente/:id', upload.single("myFile"), async (req, res) => {
     const id = req.params.id
     console.log(req.body)
-    const { nombreCliente, rfcCliente, nombreContacto, puestoContacto, celularContacto,vendedor, whatsappContacto, eMailContacto, pais, estado, codigoPostal, direccion, giro } = req.body
-    await SPModels.Cliente.findOneAndUpdate({ _id: id }, { nombreCliente, rfcCliente,idVendedor:vendedor[0], nombreContacto, puestoContacto, celularContacto, whatsappContacto, eMailContacto, pais, estado, codigoPostal, direccion, giro, idOrganizacion: req.user.idOrg, usuarioCreador: req.user._id })
+    const { nombreCliente, rfcCliente, nombreContacto, puestoContacto, celularContacto, vendedor, whatsappContacto, eMailContacto, pais, estado, codigoPostal, direccion, giro } = req.body
+    await SPModels.Cliente.findOneAndUpdate({ _id: id }, { nombreCliente, rfcCliente, idVendedor: vendedor[0], nombreContacto, puestoContacto, celularContacto, whatsappContacto, eMailContacto, pais, estado, codigoPostal, direccion, giro, idOrganizacion: req.user.idOrg, usuarioCreador: req.user._id })
     const newInsertMsg = new SPModels.ComentarioCliente({ idCliente: id, tipoComentario: "ModificacionCliente", comentario: "Cliente Modificado Por : " + req.user.User + "(" + req.user.NombreRol + ")", idOrganizacion: req.user.idOrg, usuarioCreador: req.user._id })
     await newInsertMsg.save()
     req.flash('success_msg', 'Cliente modificado')
     res.redirect('/cliente')
 })
+router.post('/clienteUpdate', use(async (req, res) => {
+    const { tag, cliente } = req.body
+    await SPModels.Cliente.findOneAndUpdate({ _id: cliente }, { tag: tag, idOrganizacion: req.user.idOrg, usuarioCreador: req.user._id });
+}))
 // POST DELETE
 router.delete('/cliente/:id', use(async (req, res) => {
     const id = req.params.id
@@ -371,7 +608,7 @@ router.get('/embudo', use(async (req, res) => {
                 "foreignField": "tag",
                 "pipeline": [{
                     $project: {
-                        "nombreCliente": "$nombre",
+                        "nombreCliente": "$nombreCliente",
                         "idCliente": "$_id"
                     }
                 }],
@@ -379,7 +616,7 @@ router.get('/embudo', use(async (req, res) => {
             }
         }
     ])
-    console.log(data)
+    console.log(data[1].clientes)
     const control = []
     control.push({
         boton: {

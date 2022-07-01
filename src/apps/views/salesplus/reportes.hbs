@@ -1,0 +1,411 @@
+<script src="https://cdn.jsdelivr.net/gh/RubaXa/Sortable/Sortable.min.js"></script>
+<div class="container-fluid mt-3">
+    <div class="card">
+        <div class="card-body">
+            <h4 class="card-title">Reportes</h4>
+            <div class="button-icon">
+                <ul class="nav nav-tabs mb-3" role="tablist">
+                    <li class="nav-item"><a class="nav-link active" data-toggle="tab" href="#repVentas"><span><i
+                                    class="fa fa-table"></i></span></a>
+                    </li>
+                    <li class="nav-item"><a class="nav-link " data-toggle="tab" href="#chartVentas"><span><i
+                                    class="fa fa-line-chart"></i></span></a>
+                    </li>
+                </ul>
+                <!-- Tab panes -->
+                <div class="tab-content tabcontent-border">
+                    <div class="tab-pane fade show active" id="repVentas" role="tabpanel">
+                        <div class="container-fluid">
+                            <div class="row">
+                                <div class="col-sm-2">
+                                    <div class="row">
+                                        <div class="card rounded">
+                                            <div class="rounded">
+                                                <h6 class="ms-2 mt-2 mb-2">
+                                                    Dimensiones
+                                                </h6>
+                                            </div>
+                                            <div class="card-body p-0 shadow bg-white rounded">
+                                                <ul class="list-group-dim" id="Dimensiones">
+                                                    {{#each Dim}}
+                                                    <input type="text" class="form-control visually-hidden"
+                                                        id="val{{Nombre}}" value="{{ Valores}}">
+                                                    <li class="list-group-item " id="{{Nombre}}">
+                                                        {{Nombre}}</li>
+                                                    {{/each}}
+                                                </ul>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="card rounded">
+                                            <div class="rounded">
+                                                <h6 class="ms-2 mt-2 mb-2">
+                                                    Metricas
+                                                </h6>
+                                            </div>
+                                            <div class="card-body p-0 shadow bg-white rounded">
+                                                <ul class="list-group-met" id="Metricas">
+                                                    {{#each Metricas}}
+                                                    <input type="text" class="form-control visually-hidden"
+                                                        id="val{{Nombre}}" value="{{ Valores}}">
+                                                    <li class="list-group-item " id="{{Nombre}}">
+                                                        {{Nombre}}</li>
+                                                    {{/each}}
+                                                </ul>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="card rounded">
+                                            <div class="rounded">
+                                                <h6 class="ms-2 mt-2 mb-2">
+                                                    Tiempos
+                                                </h6>
+                                            </div>
+                                            <div class="card-body p-0 shadow bg-white rounded">
+                                                <ul class="list-group-tem" id="Tiempos">
+                                                    {{#each Temp}}
+                                                    <input type="text" class="form-control visually-hidden"
+                                                        id="val{{Nombre}}" value="{{ Valores}}">
+                                                    <li class="list-group-item " id="{{Nombre}}">
+                                                        {{Nombre}}</li>
+                                                    {{/each}}
+                                                </ul>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                </div>
+                                <div class="col-sm-10">
+                                    <div class="row">
+                                        <div class="col-sm-4">
+                                            <h6>Arrastra las Columnas</h6>
+                                            <ul class="list-group-temT" id="Columnas">
+
+                                            </ul>
+                                        </div>
+                                        <div class="col-sm-4">
+                                            <h6>Arrastra las Filas</h6>
+                                            <ul class="list-group-dimT" id="Filas">
+
+                                            </ul>
+                                        </div>
+                                        <div class="col-sm-4">
+                                            <h6>Arrastra los valores</h6>
+                                            <ul class="list-group-metT" id="Valores">
+
+                                            </ul>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <table id="reporte" class="table table-bordered zero-configuration">
+                                            <thead>
+                                            </thead>
+                                            <tbody>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                    <div class="tab-pane fade " id="chartVentas" role="tabpanel">
+                        <canvas id="reporteChart" width="500" height="200"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    var list = document.getElementsByClassName("list-group-dim");
+    for (var i = 0; i < list.length; i++) {
+        Sortable.create(list[i], {
+            animation: 100,
+            group: {
+                name: 'dim',
+                pull: 'clone' // To clone: set pull to 'clone'
+            },
+            draggable: '.list-group-item',
+            handle: '.list-group-item',
+            sort: true,
+            filter: '.sortable-disabled',
+            chosenClass: 'active',
+            onEnd: function (/**Event*/evt) {
+                drawTable()
+            },
+        });
+    }
+    var list = document.getElementsByClassName("list-group-dimT");
+    for (var i = 0; i < list.length; i++) {
+        Sortable.create(list[i], {
+            animation: 100,
+            group: 'dim',
+            draggable: '.list-group-item',
+            handle: '.list-group-item',
+            sort: true,
+            filter: '.sortable-disabled',
+            chosenClass: 'active',
+            onEnd: function (/**Event*/evt) {
+                drawTable()
+            },
+        });
+    }
+    var list = document.getElementsByClassName("list-group-met");
+    for (var i = 0; i < list.length; i++) {
+        Sortable.create(list[i], {
+            animation: 100,
+            group: {
+                name: 'met',
+                pull: 'clone' // To clone: set pull to 'clone'
+            },
+            draggable: '.list-group-item',
+            handle: '.list-group-item',
+            sort: true,
+            filter: '.sortable-disabled',
+            chosenClass: 'active',
+            onEnd: function (/**Event*/evt) {
+                drawTable()
+            },
+        });
+    }
+    var list = document.getElementsByClassName("list-group-metT");
+    for (var i = 0; i < list.length; i++) {
+        Sortable.create(list[i], {
+            animation: 100,
+            group: 'met',
+            draggable: '.list-group-item',
+            handle: '.list-group-item',
+            sort: true,
+            filter: '.sortable-disabled',
+            chosenClass: 'active',
+            onEnd: function (/**Event*/evt) {
+                drawTable()
+            },
+        });
+    }
+    var list = document.getElementsByClassName("list-group-tem");
+    for (var i = 0; i < list.length; i++) {
+        Sortable.create(list[i], {
+            animation: 100,
+            group: {
+                name: 'tem',
+                pull: 'clone' // To clone: set pull to 'clone'
+            },
+            draggable: '.list-group-item',
+            handle: '.list-group-item',
+            sort: true,
+            filter: '.sortable-disabled',
+            chosenClass: 'active',
+            onEnd: function (/**Event*/evt) {
+                drawTable()
+            },
+        });
+    }
+    var list = document.getElementsByClassName("list-group-temT");
+    for (var i = 0; i < list.length; i++) {
+        Sortable.create(list[i], {
+            animation: 100,
+            group: 'tem',
+            draggable: '.list-group-item',
+            handle: '.list-group-item',
+            sort: true,
+            filter: '.sortable-disabled',
+            chosenClass: 'active',
+            onEnd: function (/**Event*/evt) {
+                drawTable()
+            },
+        });
+    }
+    function cb() {
+        var cube = []
+        const meses = ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"]
+        $.each(JSON.parse($('#valOperaciones').val()), function (i, vitem) {
+            var mFac = parseFloat(vitem.montoFactura, 10).toFixed(2)
+            var mPag = parseFloat(vitem.montoPagado, 10).toFixed(2)
+            var estatus = vitem.estadoFactura
+            var mesFact = meses[parseInt(moment(vitem.fechaFactura).format("MM"))]
+            var mesPago = meses[parseInt(moment(vitem.fechaPago).format("MM"))]
+            var mesLim = meses[parseInt(moment(vitem.fechaLimite).format("MM"))]
+            var yrFact = parseInt(moment(vitem.fechaFactura).format("YYYY"))
+            var yrPago = parseInt(moment(vitem.fechaPago).format("YYYY"))
+            var yrLim = parseInt(moment(vitem.fechaLimite).format("YYYY"))
+            var cli = JSON.parse($('#valClientes').val()).find(el => el._id === vitem.idCliente);
+            var vend = JSON.parse($('#valUsuarios').val()).find(el => el._id === cli.idVendedor);
+            var rol = JSON.parse($('#valRol').val()).find(el => el._id === vend.Rol);
+            cube.push({ mFac, mPag, estatus, mesFact, mesPago, mesLim, yrFact, yrLim, idCliente: cli._id, idVendedor: vend._id, idRol: rol._id })
+        });
+        return JSON.stringify(cube);
+    }
+    function drawTable() {
+        var table = []
+        var header = "<tr>"
+        var row = "<tr>"
+        var monto
+        var mes
+        var yr
+        var valm
+        var valy
+        var montom
+        var montoy
+        const meses = ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"]
+        table.push($('#Columnas li:nth-child(1)').attr("id"), $('#Filas li:nth-child(1)').attr("id"), $('#Valores li:nth-child(1)').attr("id"))
+        if (containsUndefined(table) === false) {
+            header = header + "<th>" + table[1] + "</th>"
+            $.each(JSON.parse($('#val' + table[0]).val()), function (i, item) {
+                header = header + "<th>" + item + "</th>"
+            });
+            header = header + "</tr>"
+            $("#reporte > thead").append(header);
+            $.each(JSON.parse($('#val' + table[1]).val()), function (i, fitem) {
+                row = row + "<td>" + (isUndefined(fitem.nombre) ? fitem.nombreCliente : fitem.nombre) + "</td>"
+                $.each(JSON.parse($('#val' + table[0]).val()), function (i, item) {
+                    row = row + "<td id='" + fitem._id + item + "'>$0.00</td>"
+                });
+                row = row + "</tr>"
+                $("#reporte > tbody").append(row);
+                row = "<tr>"
+            });
+            var cube = cb()
+            console.log(cube)
+            $.each(JSON.parse(cube), function (i, fitem) {
+                if (table[1] === "Rol") {
+                    valm = (isUndefined($("#" + fitem.idRol + fitem.mesFact).html()) ? '' : $("#" + fitem.idRol + fitem.mesFact).html())
+                    valy = (isUndefined($("#" + fitem.idRol + fitem.yrFact).html()) ? '' : $("#" + fitem.idRol + fitem.yrFact).html())
+                    montom = parseFloat(fitem.mFac) + parseFloat(valm.toString().replace('$', '').replace(',', ''))
+                    montoy = parseFloat(fitem.mFac) + parseFloat(valy.toString().replace('$', '').replace(',', ''))
+                    montom = '$' + parseFloat(montom, 10).toFixed(2).replace(/(\d)(?=(\d{3})+\.)/g, "$1,").toString()
+                    montoy = '$' + parseFloat(montoy, 10).toFixed(2).replace(/(\d)(?=(\d{3})+\.)/g, "$1,").toString()
+                    $("#" + fitem.idRol + fitem.mesFact).html(montom)
+                    $("#" + fitem.idRol + fitem.yrFact).html(montoy)
+                } else if (table[1] === "Clientes") {
+                    valm = (isUndefined($("#" + fitem.idCliente + fitem.mesFact).html()) ? '' : $("#" + fitem.idCliente + fitem.mesFact).html())
+                    valy = (isUndefined($("#" + fitem.idCliente + fitem.yrFact).html()) ? '' : $("#" + fitem.idCliente + fitem.yrFact).html())
+                    montom = parseFloat(fitem.mFac) + parseFloat(valm.toString().replace('$', '').replace(',', ''))
+                    montoy = parseFloat(fitem.mFac) + parseFloat(valy.toString().replace('$', '').replace(',', ''))
+                    montom = '$' + parseFloat(montom, 10).toFixed(2).replace(/(\d)(?=(\d{3})+\.)/g, "$1,").toString()
+                    montoy = '$' + parseFloat(montoy, 10).toFixed(2).replace(/(\d)(?=(\d{3})+\.)/g, "$1,").toString()
+                    $("#" + fitem.idCliente + fitem.mesFact).html(montom)
+                    $("#" + fitem.idCliente + fitem.yrFact).html(montoy)
+                } else if (table[1] === "Usuarios") {
+                    valm = (isUndefined($("#" + fitem.idVendedor + fitem.mesFact).html()) ? '' : $("#" + fitem.idVendedor + fitem.mesFact).html())
+                    valy = (isUndefined($("#" + fitem.idVendedor + fitem.yrFact).html()) ? '' : $("#" + fitem.idVendedor + fitem.yrFact).html())
+                    montom = parseFloat(fitem.mFac) + parseFloat(valm.toString().replace('$', '').replace(',', ''))
+                    montoy = parseFloat(fitem.mFac) + parseFloat(valy.toString().replace('$', '').replace(',', ''))
+                    montom = '$' + parseFloat(montom, 10).toFixed(2).replace(/(\d)(?=(\d{3})+\.)/g, "$1,").toString()
+                    montoy = '$' + parseFloat(montoy, 10).toFixed(2).replace(/(\d)(?=(\d{3})+\.)/g, "$1,").toString()
+                    $("#" + fitem.idVendedor + fitem.mesFact).html(montom)
+                    $("#" + fitem.idVendedor + fitem.yrFact).html(montoy)
+                }
+            })
+            var lineChartData2 = {
+                type: 'bar',
+                data: {
+                    labels: generateLabelsFromTable(),
+                    datasets: generateDataSetsFromTable()
+                },
+                options: {
+                    responsive: true,
+                    legend: {
+                        position: 'left'
+                    },
+                    interaction: {
+                        intersect: false,
+                    },
+                    scales: {
+                        x: {
+                            stacked: true,
+                        },
+                        y: {
+                            stacked: true
+                        }
+                    }
+                }
+            };
+            const ctx = $('#reporteChart');
+            var myChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: generateLabelsFromTable(),
+                    datasets: generateDataSetsFromTable()
+                },
+                options: {
+                    responsive: true,
+                    legend: {
+                        position: 'left'
+                    },
+                    interaction: {
+                        intersect: false,
+                    },
+                    scales: {
+                        x: {
+                            stacked: true,
+                        },
+                        y: {
+                            stacked: true
+                        }
+                    }
+                }
+            });
+        }
+    }
+    function containsUndefined(arr) {
+        return arr.includes(undefined);
+    }
+    function isUndefined(obj) {
+        if (obj === undefined) {
+            return true
+        } else {
+            return false
+        }
+
+    }
+    function generateDataSetsFromTable() {
+        var data;
+        var datasets = [];
+        var rows = $("#reporte > tbody > tr");
+
+        var data = [];
+        var dtMes = [];
+        var lbl
+        rows.each(function (index) {
+            var cols = $(this).find("td");
+            console.log(this)
+            cols.each(function (innerIndex) {
+                if (innerIndex != 0) {
+                    dtMes.push(parseFloat($(this).text().toString().replace('$', '').replace(',', '')));
+                } else {
+                    lbl = $(this).text()
+                }
+
+            });
+            var dataset = {
+                label: lbl,
+                data: dtMes
+            }
+            datasets.push(dataset);
+            dataset = []
+            dtMes = []
+
+        });
+
+        console.log(datasets)
+        return datasets;
+    }
+    function generateLabelsFromTable() {
+        var labels = [];
+        var rows = $("#reporte > thead > tr");
+        rows.each(function (index) {
+            var cols = $(this).find("th");
+            cols.each(function (innerIndex) {
+                if (innerIndex != 0)
+                    labels.push($(this).text());
+            });
+
+        });
+        console.log(labels)
+        return labels;
+    }
+</script>

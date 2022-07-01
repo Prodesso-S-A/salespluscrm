@@ -4,9 +4,8 @@ const mongoose = require("mongoose");
 // Creating a Schema for uploaded files
 const operacionclienteSchema = new mongoose.Schema({
     idCliente:{type:String, required:true},
-    folioFiscal:{type:String, required:true},
+    folioFiscal:{type:String, default:""},
     folio:{type:String, required:true},
-    serie:{type:String, required:true},
     montoFactura:{type:Number, required:true},
     montoPagado:{type:Number, default:0},
     estadoFactura:{type:String, default:"Por Pagar"},

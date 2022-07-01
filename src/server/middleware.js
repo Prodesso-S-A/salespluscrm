@@ -8,7 +8,8 @@ let RedisStore = require("connect-redis")(sessions)
 // redis@v4
 const { createClient } = require("redis")
 let redisClient = createClient({
-legacyMode:true
+    url: "redis://:p00f050a78710f2cd2f889f4b7e6d6d2b8c182bab3553a98b6939a45f7e9d85f1@ec2-34-224-248-220.compute-1.amazonaws.com:8749",
+    legacyMode: true
 })
 redisClient.connect().catch(console.error)
 

@@ -426,7 +426,7 @@ router.get('/menu/:id', use(async (req, res) => {
 }))
 router.get('/moduloorganizacion/:id', use(async (req, res) => {
     const id = req.params.id
-    const modOrg = await AdminModels.ModuloOrganizacion.aggregate([
+    const modOrg = await AdminModels.Moduloorganizacion.aggregate([
         { $match: { id: id } },
         {
             $project: {
@@ -594,13 +594,13 @@ router.post('/moduloorganizacion', use(async (req, res) => {
     if (errors.length > 0) {
         res.render('moduloorganizacion', { idOrg, mod })
     } else {
-        const moduloOrgAdd = await AdminModels.ModuloOrganizacion.findOne({ idModulo: mod, idOrganizacion: idOrg }).lean()
+        const moduloOrgAdd = await AdminModels.Moduloorganizacion.findOne({ idModulo: mod, idOrganizacion: idOrg }).lean()
         if (moduloOrgAdd) {
             req.flash('error_msg', 'Modulo/Organización ya existe')
             res.redirect('/moduloorganizacion')
         } else {
 
-            const newModuloOrg = new AdminModels.ModuloOrganizacion({ idModulo: mod, idOrganizacion: idOrg })
+            const newModuloOrg = new AdminModels.Moduloorganizacion({ idModulo: mod, idOrganizacion: idOrg })
             await newModuloOrg.save()
             req.flash('success_msg', 'Modulo/Organización agregado')
             res.redirect('/moduloorganizacion')

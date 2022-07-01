@@ -6,7 +6,9 @@ const mensajeSchema = new mongoose.Schema({
     mensaje:{type:String, required:true},
     plataforma:{type:String,required:true},
     fechaCreacion: {type: Date,default: Date.now},
-    idConversacion:{type:String, required:true}
+    estado:{type:String,default:"unread"},
+    favorito:{type:String,default:false},
+    idCliente:{type:String,required:true}
 });
 
 // Creating a Model from that Schema

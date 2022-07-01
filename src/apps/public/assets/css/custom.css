@@ -1,13 +1,58 @@
 .table-header-rotated {
     border-collapse: collapse;
 }
-
 .table-header-rotated td {
     width: 30px;
 }
 
 .table-header-rotated th {
     padding: 5px 10px;
+}
+
+th[colspan]:not([colspan="1"]) {
+    text-align: center;
+}
+
+.btnV {
+    background-color: #13D66C;
+    color: #183153;
+    border: none;
+    box-shadow: rgba(0, 0, 0, 0.4) 0px 2px 4px, rgba(0, 0, 0, 0.3) 0px 7px 13px -3px, rgba(0, 0, 0, 0.2) 0px -3px 0px inset;
+    border-radius: 8px;
+    display: inline-block;
+    padding: 0.25em 0.4em;
+    text-align: center;
+    white-space: nowrap;
+    vertical-align: baseline;
+    border-radius: 0.25rem;
+}
+
+.btnE {
+    background-color: #fcd33b;
+    color: #183153;
+    border: none;
+    box-shadow: rgba(0, 0, 0, 0.4) 0px 2px 4px, rgba(0, 0, 0, 0.3) 0px 7px 13px -3px, rgba(0, 0, 0, 0.2) 0px -3px 0px inset;
+    border-radius: 8px;
+    display: inline-block;
+    padding: 0.25em 0.4em;
+    text-align: center;
+    white-space: nowrap;
+    vertical-align: baseline;
+    border-radius: 0.25rem;
+}
+
+.btnD {
+    background-color: #F71C16;
+    color: #183153;
+    border: none;
+    box-shadow: rgba(0, 0, 0, 0.4) 0px 2px 4px, rgba(0, 0, 0, 0.3) 0px 7px 13px -3px, rgba(0, 0, 0, 0.2) 0px -3px 0px inset;
+    border-radius: 8px;
+    display: inline-block;
+    padding: 0.25em 0.4em;
+    text-align: center;
+    white-space: nowrap;
+    vertical-align: baseline;
+    border-radius: 0.25rem;
 }
 
 .table-header-rotated td {

@@ -12,7 +12,16 @@
                     <span class="nav-text">{{this.NombreMenuPadre}}</span>
                 </a>
                 <ul aria-expanded="false">
-                    <li><a href="{{this.Menu.Url}}"><i class="{{this.Menu.icono}}"></i>{{this.Menu.NombreMenu}}</a></li>
+                    {{#each this.Menu}}
+                    <li><a href="{{this.Url}}"><i class="{{this.icono}}"></i>{{this.NombreMenu}}</a></li>
+                    {{#if this.Rep}}
+                    <ul aria-expanded="false">
+                        {{#each this.Rep}}
+                        <li><a href="/reportes?id={{this.idReporte}}"><i class="fa fa-bar-chart"></i>{{this.nombreReporte}}</a></li>
+                        {{/each}}
+                    </ul>
+                    {{/if}}
+                    {{/each}}
                 </ul>
             </li>
             {{/each}}

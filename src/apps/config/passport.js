@@ -38,7 +38,7 @@ passport.deserializeUser(async (id, done) => {
                     "email": 1,
                     "Licencia": 1,
                     "NombreRol": 1,
-                    "foto":1
+                    "foto": 1
                 }
             },
             {
@@ -107,27 +107,28 @@ passport.deserializeUser(async (id, done) => {
                     "Org": 0
                 }
             }
-    
+
         ])
         var usrMenu = []
         var usr = userModel[0]
-        const permarr = []
-        const men = []
-        const lig = []
-        const ligSeg = []
-        const idTP = []
-        const idMod = []
-        const rol = await Rol.findOne({ _id: userModel[0].idRol }, { _id: 0, Permisos: 1 }).lean()
+        var permarr = []
+        var men = []
+        var lig = []
+        var ligSeg = []
+        var idTP = []
+        var idMod = []
+        var rep = []
+        rep.push({ idReporte:0, nombreReporte: "Reporte de Ventas", Dimensiones: [{ Dimension:"Ventas"}] })
+        var rol = await Rol.findOne({ _id: userModel[0].idRol }, { _id: 0, Permisos: 1 }).lean()
         for (let f of rol.Permisos) {
             idMod.push(f.idModulo)
         }
-        var segmentos = await Menu.distinct("Segmento", { 'idModulo': { $in: idMod }, idOrganizacion: userModel[0].idOrg  }).lean()
+        var segmentos = await Menu.distinct("Segmento", { 'idModulo': { $in: idMod }, idOrganizacion: userModel[0].idOrg }).lean()
         for (let seg of segmentos) {
             var menuPadre = await Menu.distinct("idMenuPadre", { 'idModulo': { $in: idMod }, 'Segmento': { $in: seg }, idOrganizacion: userModel[0].idOrg }).lean()
             for (let mp of menuPadre) {
                 var menus = await Menu.find({ idMenuPadre: mp, Segmento: seg }).lean()
                 for (let menu of menus) {
-                    while (men.length) { men.pop(); }
                     for (let perm of rol.Permisos) {
                         if (perm.idModulo == menu.idModulo) {
                             idTP.push(perm.idtipoPermiso)
@@ -138,14 +139,21 @@ passport.deserializeUser(async (id, done) => {
                         permarr.push(x.Nombre)
                     }
                     var mod = await Modulo.findOne({ _id: menu.idModulo }).lean()
-                    men.push({ NombreMenu: menu.Nombre,iconoPadre: menu.ClassPadre, icono: menu.Class, Permiso: permarr, Url: mod.Url })
+                    if (menu.Nombre === "Ventas") {
+                        men.push({ NombreMenu: menu.Nombre, iconoPadre: menu.ClassPadre, icono: menu.Class, Permiso: permarr, Url: mod.Url, Rep: rep })
+                    } else {
+                        men.push({ NombreMenu: menu.Nombre, iconoPadre: menu.ClassPadre, icono: menu.Class, Permiso: permarr, Url: mod.Url })
+                    }
+
+                    idTP = []
+                    permarr = []
                 }
-                lig.push({ "NombreMenuPadre": mp, "Menu": men[0] })
-               
+                lig.push({ "NombreMenuPadre": mp, "Menu": men })
+
             }
-            ligSeg.push({"Segmento":seg,"MenuPadre":lig})
+            ligSeg.push({ "Segmento": seg, "MenuPadre": lig })
         }
-        usrMenu.push({"Ligas":ligSeg}) 
+        usrMenu.push({ "Ligas": ligSeg })
         usr['userMenu'] = usrMenu
         done(err, usr)
     })

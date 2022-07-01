@@ -95,7 +95,7 @@ Fixing Order => Base + Typography >> General Layout + Grid >> Page Layout + Comp
   --white: #fff;
   --gray: #f7fafc;
   --gray-dark: #333333;
-  --primary: #7571f9;
+  --primary: #183153;
   --secondary: #9097c4;
   --success: #6fd96f;
   --info: #4d7cff;
@@ -2729,14 +2729,14 @@ fieldset:disabled a.btn {
 
 .btn-primary {
   color: #fff;
-  background-color: #7571f9;
-  border-color: #7571f9;
+  background-color: #183153;
+  border-color: #183153;
 }
 
 .btn-primary:hover {
   color: #fff;
-  background-color: #514cf7;
-  border-color: #4540f7;
+  background-color: #183154;
+  border-color: #183155;
 }
 
 .btn-primary:focus,
@@ -2804,9 +2804,9 @@ fieldset:disabled a.btn {
 }
 
 .btn-success {
-  color: #212529;
-  background-color: #6fd96f;
-  border-color: #6fd96f;
+  color: white;
+  background-color: #183153;
+  border-color: #183153;
 }
 
 .btn-success:hover {
@@ -2822,9 +2822,9 @@ fieldset:disabled a.btn {
 
 .btn-success.disabled,
 .btn-success:disabled {
-  color: #212529;
-  background-color: #6fd96f;
-  border-color: #6fd96f;
+  color: white;
+  background-color: #183153;
+  border-color: #183153;
 }
 
 .btn-success:not(:disabled):not(.disabled):active,
@@ -5839,7 +5839,7 @@ button.close {
 
 .modal-dialog {
   position: relative;
-  width: auto;
+  width: 950px;
   margin: 0.5rem;
   pointer-events: none;
 }
@@ -5952,9 +5952,9 @@ button.close {
   overflow: scroll;
 }
 
-@media (min-width: 576px) {
+@media (min-width: 950px) {
   .modal-dialog {
-    max-width: 500px;
+    max-width: 950px;
     margin: 1.75rem auto;
   }
 
@@ -5973,7 +5973,7 @@ button.close {
 
 @media (min-width: 992px) {
   .modal-lg {
-    max-width: 950px;
+    max-width: 1500px;
   }
 }
 
@@ -11045,7 +11045,16 @@ body {
 #main-wrapper.show {
   opacity: 1;
 }
+#modal-wrapper {
+  opacity: 0;
+  transition: all 0.25s ease-in;
+  overflow: hidden;
+  position: relative;
+}
 
+#modal-wrapper.show {
+  opacity: 1;
+}
 .page-heading {
   font-size: 1.125rem;
   color: #333333;
@@ -11490,7 +11499,7 @@ sub {
 .hamburger .toggle-icon {
   font-size: 1.4rem;
   line-height: 2rem;
-  color: #494949;
+  color: white;
 }
 
 .hamburger:hover {
@@ -14124,7 +14133,7 @@ Fixing Order => Base + Typography >> General Layout + Grid >> Page Layout + Comp
 
 #add-category .modal-dialog,
 #event-modal .modal-dialog {
-  max-width: 600px;
+  max-width: 950px;
 }
 
 .fc-view.fc-month-view.fc-basic-view,
@@ -14222,8 +14231,6 @@ Fixing Order => Base + Typography >> General Layout + Grid >> Page Layout + Comp
   position: absolute;
   top: 0;
   right: 0;
-  width: 170px;
-  padding-left: 80px;
 }
 
 .email-checkbox {
@@ -14386,8 +14393,8 @@ Fixing Order => Base + Typography >> General Layout + Grid >> Page Layout + Comp
 }
 
 .login-form__btn {
-  background: #455F98;
-  color: #fff;
+  background: #183153;
+  color: white;
   padding: 13px 40px;
   font-size: 14px;
 }
@@ -14400,7 +14407,7 @@ Fixing Order => Base + Typography >> General Layout + Grid >> Page Layout + Comp
 
 .login-form__btn.submit {
   padding: 15px 40px;
-  background: #7571f9;
+  background: #183153;
   font-weight: 700;
 }
 
@@ -17066,7 +17073,16 @@ table.dataTable thead .sorting::after {
   z-index: 99999999999;
   background: #fff;
 }
-
+#modalloader {
+  height: 100%;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 99999999999;
+  background: #fff;
+}
 .loader {
   position: absolute;
   width: 5rem;

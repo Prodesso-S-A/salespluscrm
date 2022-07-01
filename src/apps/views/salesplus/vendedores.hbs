@@ -1,24 +1,22 @@
-<style>
-    tr.rowHead {
-        cursor: pointer;
-    }
-</style>
 <div class="container-fluid mt-3">
     <div class="card">
         <div class="card-body">
             <h4 class="card-title">Meta de Ventas</h4>
             <div class="button-icon">
                 <ul class="nav nav-tabs mb-3" role="tablist">
-                    <li class="nav-item"><a class="nav-link active" data-toggle="tab" href="#tabla"><span><i
+                    <li class="nav-item"><a class="nav-link active" data-toggle="tab" href="#vendedores"><span><i
+                                    class="fa fa-users"></i></span></a>
+                    </li>
+                    <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#repVentas"><span><i
                                     class="fa fa-table"></i></span></a>
                     </li>
-                    <li class="nav-item"><a class="nav-link " data-toggle="tab" href="#ventas"><span><i
+                    <li class="nav-item"><a class="nav-link " data-toggle="tab" href="#chartVentas"><span><i
                                     class="fa fa-line-chart"></i></span></a>
                     </li>
                 </ul>
                 <!-- Tab panes -->
                 <div class="tab-content tabcontent-border">
-                    <div class="tab-pane fade show active" id="tabla" role="tabpanel">
+                    <div class="tab-pane fade show active" id="vendedores" role="tabpanel">
                         <div class="p-t-15">
                             <div class="table-responsive">
                                 <table id="metaVentas" class="table table-bordered zero-configuration">
@@ -37,7 +35,11 @@
                             </div>
                         </div>
                     </div>
-                    <div class="tab-pane fade " id="ventas" role="tabpanel">
+                    <div class="tab-pane fade " id="repVentas" role="tabpanel">
+                        <table id="repVentas" class="table table-bordered zero-configuration">
+                        </table>
+                    </div>
+                    <div class="tab-pane fade " id="chartVentas" role="tabpanel">
                         <canvas id="ventasChart" width="500" height="200"></canvas>
                     </div>
                 </div>
